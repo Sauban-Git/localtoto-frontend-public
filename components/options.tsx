@@ -1,0 +1,86 @@
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+
+interface OptionsProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const Options: React.FC<OptionsProps> = ({ isOpen, onClose }) => {
+  const router = useRouter()
+  // const logOut = async () => {
+  //   await AsyncStorage.removeItem("token")
+  //   await AsyncStorage.removeItem("userInfo")
+  // };
+
+  if (!isOpen) return null;
+
+  return (
+    <View style={styles.overlay}>
+      <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
+      <View style={styles.popup}>
+        <TouchableOpacity style={styles.option} onPress={() => { }}>
+          <Text style={styles.optionText}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={() => { }}>
+          <Text style={styles.optionText}>Rides</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={() => { }}>
+          <Text style={styles.optionText}>Safety</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={() => { }}>
+          <Text style={styles.optionText}>About</Text>
+        </TouchableOpacity><TouchableOpacity style={styles.option} onPress={() => { }}>
+          <Text style={styles.optionText}>Become a Rider</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={() => { }}>
+          <Text style={styles.optionText}>FAQs</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={() => { }}>
+          <Text style={styles.optionText}>Careers</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={() => { }}>
+          <Text style={styles.optionText}>Contact Us</Text>
+        </TouchableOpacity>
+      </View>
+    </View >
+  );
+};
+
+const styles = StyleSheet.create({
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  popup: {
+    position: "absolute",
+    top: 60, // adjust as needed
+    right: 16,
+    width: 180,
+    borderRadius: 8,
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    backgroundColor: "white"
+  },
+  option: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  optionText: {
+    fontSize: 16,
+  },
+});
