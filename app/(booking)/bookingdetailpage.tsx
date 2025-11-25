@@ -36,6 +36,7 @@ const BookingDetailsPage = () => {
   const otpHook = useOtpVerification();
 
   const [pickupCoords, setPickup] = useState<MapCoordinates | null>(null);
+  const [markerCoords, setMarkerCoords] = useState<MapCoordinates | null>(null);
   const [pickupAddress, setPickupAddress] = useState<string>("");
   const [dropCoords, setDrop] = useState<MapCoordinates | null>(null);
   const [dropAddress, setDropAddress] = useState<string>("")
@@ -68,6 +69,8 @@ const BookingDetailsPage = () => {
       dropCoords,
       rideType: selectedRideType,
       scheduledDate,
+      pickupAddress,
+      dropAddress,
       scheduledTime,
       fare:
         selectedRideType === "private"
@@ -176,7 +179,7 @@ const BookingDetailsPage = () => {
 
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    setPickup({ lat: latitude, lng: longitude }); // Set pickup location
+    setMarkerCoords({ lat: latitude, lng: longitude }); // Set pickup location
     // Optionally center the map at the tapped location
     console.log("Pickup: lat: ", latitude, "lng: ", longitude)
     mapRef.current?.animateCamera({
@@ -186,15 +189,14 @@ const BookingDetailsPage = () => {
   };
 
   // Set Pickup to Current Location
-  const handleUseCurrentLocation = async (event: any) => {
-    const { latitude, longitude } = event.nativeEvent.coordinate;
-    setPickup({ lat: latitude, lng: longitude });
+  const handleUseCurrentLocation = async () => {
+    setPickup(markerCoords);
     mapRef.current?.animateCamera({
-      center: { latitude, longitude },
+      center: { latitude: markerCoords!.lat, longitude: markerCoords!.lng },
       zoom: 15,
     });
     try {
-      const data = await olaMapsService.reverseGeocode(latitude, longitude);
+      const data = await olaMapsService.reverseGeocode(markerCoords!.lat, markerCoords!.lng);
       if (data?.success) {
         setPickupAddress(data.address);
       } else {
@@ -210,15 +212,15 @@ const BookingDetailsPage = () => {
   };
 
   // Set Drop using Marker
-  const handleSetDropLocation = async (event: any) => {
-    const { latitude, longitude } = event.nativeEvent.coordinate;
-    setDrop({ lat: latitude, lng: longitude });
+  const handleSetDropLocation = async () => {
+    setDrop(markerCoords);
+    if (!markerCoords?.lat || !markerCoords.lat) return
     mapRef.current?.animateCamera({
-      center: { latitude, longitude },
+      center: { latitude: markerCoords?.lat, longitude: markerCoords?.lng },
       zoom: 15,
     });
     try {
-      const data = await olaMapsService.reverseGeocode(latitude, longitude);
+      const data = await olaMapsService.reverseGeocode(markerCoords.lat, markerCoords.lng);
       if (data?.success) {
         setDropAddress(data.address);
       } else {
@@ -242,8 +244,7 @@ const BookingDetailsPage = () => {
           style={{ flex: 1 }}
           showsUserLocation={true} // Shows the user's location marker on the map
           followsUserLocation={true} // Follows user's location automatically
-          // onPress={(e) => handleMapPress(e)}
-          onPress={handleSetDropLocation}
+          onPress={(e) => handleMapPress(e)}
         >
           {/* Center pin, it will be moved to the current location */}
           {location && (
@@ -365,9 +366,7 @@ const BookingDetailsPage = () => {
           />
 
           <TouchableOpacity
-            onPress={() => {
-              setDrop(pickupCoords); // Set drop to pickup for testing purposes or handle as needed
-            }}
+            onPress={handleSetDropLocation}
             style={{
               paddingVertical: 6,
               paddingHorizontal: 12,

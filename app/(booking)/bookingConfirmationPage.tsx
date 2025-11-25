@@ -10,7 +10,6 @@ const BookingConfirmationPage = () => {
       <Text style={styles.text}>Ride Type: {data?.rideType}</Text>
       <Text style={styles.text}>Fare: {data?.fare}</Text>
       <Text style={styles.text}>Pickup: {data?.pickupAddress}</Text>
-      <Text style={styles.text}>Pickup: {data?.pickupAddress}</Text>
       <Text style={styles.text}>Drop: {data?.dropAddress}</Text>
     </View>
   );
