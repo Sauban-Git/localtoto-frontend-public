@@ -179,7 +179,7 @@ const BookingDetailsPage = () => {
 
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    setMarkerCoords({ lat: latitude, lng: longitude }); // Set pickup location
+    setMarkerCoords({ lat: latitude, lng: longitude });
     // Optionally center the map at the tapped location
     console.log("Pickup: lat: ", latitude, "lng: ", longitude)
     mapRef.current?.animateCamera({
@@ -258,6 +258,10 @@ const BookingDetailsPage = () => {
             />
           )}
 
+          {markerCoords !== null && markerCoords.lat !== null && markerCoords.lng !== null && (
+            <Marker coordinate={{ latitude: markerCoords.lat, longitude: markerCoords.lng }} title="Pickup Location" pinColor="red" />
+          )}
+
           {/* Marker for pickup */}
           {pickupCoords !== null && pickupCoords.lat !== null && pickupCoords.lng !== null && (
             <Marker coordinate={{ latitude: pickupCoords.lat, longitude: pickupCoords.lng }} title="Pickup Location" />
@@ -265,7 +269,7 @@ const BookingDetailsPage = () => {
 
           {/* Marker for drop */}
           {dropCoords !== null && dropCoords.lat !== 0 && dropCoords.lng !== 0 && (
-            <Marker coordinate={{ latitude: dropCoords.lat, longitude: dropCoords.lng }} title="Drop Location" />
+            <Marker coordinate={{ latitude: dropCoords.lat, longitude: dropCoords.lng }} title="Drop Location" pinColor="blue" />
           )}
         </MapView>
       </View>
@@ -324,6 +328,7 @@ const BookingDetailsPage = () => {
           <LocationSelector
             label="Pickup"
             iconColor="#16a34a"
+            value={pickupAddress}
             onSelectLocation={(coords, address) => {
               setPickup(coords);
               setPickupAddress(address)
@@ -354,6 +359,7 @@ const BookingDetailsPage = () => {
           </TouchableOpacity>
           <LocationSelector
             label="Drop"
+            value={dropAddress}
             iconColor="#2563eb"
             onSelectLocation={(coords, address) => {
               setDrop(coords);

@@ -7,6 +7,7 @@ import { View, TextInput, TouchableOpacity, Text, ScrollView, ActivityIndicator 
 export default function OlaSearchInput({
   placeholder,
   onSelect,
+  value,
 }: {
   placeholder: string;
   onSelect: (location: {
@@ -14,8 +15,9 @@ export default function OlaSearchInput({
     lng: number;
     address: string;
   }) => void;
+  value: string
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(value);
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +78,7 @@ export default function OlaSearchInput({
   return (
     <View style={{ width: "100%" }}>
       <TextInput
-        value={query}
+        value={value}
         onChangeText={setQuery}
         placeholder={placeholder}
         style={{
