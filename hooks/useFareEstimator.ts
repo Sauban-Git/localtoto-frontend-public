@@ -18,7 +18,7 @@ export default function useFareEstimator(
 
   useEffect(() => {
     if (!pickupCoords || !dropCoords) return;
-
+    if (pickupCoords.lat === 0 || dropCoords.lat === 0) return;
     let cancelled = false;
 
     const fetchRouteAndFare = async () => {

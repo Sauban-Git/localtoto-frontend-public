@@ -1,6 +1,8 @@
 
-import MapView from "react-native-maps";
-import React, { useState } from "react";
+import * as IntentLauncher from "expo-intent-launcher";
+import * as Location from "expo-location"
+import MapView, { Marker } from "react-native-maps";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
 import useFareEstimator from "@/hooks/useFareEstimator";
@@ -9,7 +11,6 @@ import AnimatedBackground from "@/components/animatedBackground";
 import PhoneVerificationCard from "@/components/phoneVerification";
 import LocationSelector from "@/components/locationSelector";
 import RideTypeSelector from "@/components/rideTypeSelector";
-import { MapCoordinates } from "@/services/olaMapsService";
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -17,6 +18,11 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import olaMapsService, { MapCoordinates, ReverseGeocodingResponse } from "@/services/olaMapsService";
+import { ConfirmationState } from "@/types/type"
+import { useRideStore } from "@/stores/bookingConfirmStore";
+
+type LocationState = Location.LocationObject | null;
 
 const { height } = Dimensions.get("window");
 
@@ -29,21 +35,24 @@ const BookingDetailsPage = () => {
 
   const otpHook = useOtpVerification();
 
-  const [pickupCoords, setPickup] = useState<MapCoordinates>({ lat: 0, lng: 0 });
-  const [dropCoords, setDrop] = useState<MapCoordinates>({ lat: 0, lng: 0 });
-  const [selecting, setSelecting] = useState<"pickup" | "drop" | null>(null);
+  const [pickupCoords, setPickup] = useState<MapCoordinates | null>(null);
+  const [pickupAddress, setPickupAddress] = useState<string>("");
+  const [dropCoords, setDrop] = useState<MapCoordinates | null>(null);
+  const [dropAddress, setDropAddress] = useState<string>("")
   const mapRef = React.useRef<MapView>(null);
 
   const [selectedRideType, setSelectedRideType] = useState<
     "private" | "shared" | "scheduled"
   >("private");
 
+  const setRideData = useRideStore((state) => state.setConfirmationData);
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
 
   const { fareSolo, fareShared } = useFareEstimator(pickupCoords, dropCoords);
 
   const handleConfirmBooking = () => {
+
     if (!otpHook.isAuthenticated) {
       alert("Please verify your phone first!");
       return;
@@ -54,22 +63,23 @@ const BookingDetailsPage = () => {
       return;
     }
 
-    router.push({
-      pathname: "/(booking)/bookingConfirmationPage",
-      params: {
-        pickupCoords: JSON.stringify(pickupCoords),
-        dropCoords: JSON.stringify(dropCoords),
-        rideType: selectedRideType,
-        scheduledDate,
-        scheduledTime,
-        fare:
-          selectedRideType === "private"
-            ? fareSolo?.fare
-            : selectedRideType === "shared"
-              ? fareShared?.fare
-              : fareSolo?.fare,
-      },
-    });
+    const bookingConfirmationData: ConfirmationState = {
+      pickupCoords,
+      dropCoords,
+      rideType: selectedRideType,
+      scheduledDate,
+      scheduledTime,
+      fare:
+        selectedRideType === "private"
+          ? fareSolo?.fare
+          : selectedRideType === "shared"
+            ? fareShared?.fare
+            : fareSolo?.fare,
+    }
+
+    setRideData(bookingConfirmationData);
+
+    router.push("/(booking)/bookingConfirmationPage")
   };
 
   // Bottom sheet animation states
@@ -116,37 +126,148 @@ const BookingDetailsPage = () => {
     transform: [{ translateY: translateY.value }],
   }));
 
-  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 });
+  const [location, setLocation] = useState<LocationState>(null)
+
+  useEffect(() => {
+    const getLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync()
+        if (status !== 'granted') {
+          console.log("Permission denied..")
+          return
+        }
+        const servicesEnabled = await Location.hasServicesEnabledAsync();
+        if (!servicesEnabled) {
+          console.log("Location services are OFF");
+          alert("Please enable your device's GPS / Location Services.");
+          IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.LOCATION_SOURCE_SETTINGS);
+          return;
+        }
+        const location = await Location.getCurrentPositionAsync({})
+        setLocation(location)
+      } catch (error) {
+        console.log("Error while getting location ", error)
+      }
+    }
+    getLocation()
+  }, [])
+
+  if (location) {
+    console.log("Current location: ", location.coords.latitude, " ", location.coords.longitude)
+  }
+
+  useEffect(() => {
+    if (location) {
+      // Once the location is fetched, center the map on it
+      const { latitude, longitude } = location.coords;
+
+      // Animate the map to the user's current location
+      if (mapRef.current) {
+        mapRef.current.animateCamera({
+          center: { latitude, longitude },
+          zoom: 15, // Adjust zoom level as necessary
+          pitch: 0,
+          heading: 0,
+          altitude: 0
+        });
+      }
+    }
+  }, [location]); // This will run when location is updated
+
+  const handleMapPress = (event: any) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setPickup({ lat: latitude, lng: longitude }); // Set pickup location
+    // Optionally center the map at the tapped location
+    console.log("Pickup: lat: ", latitude, "lng: ", longitude)
+    mapRef.current?.animateCamera({
+      center: { latitude, longitude },
+      zoom: 15,
+    });
+  };
+
+  // Set Pickup to Current Location
+  const handleUseCurrentLocation = async (event: any) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setPickup({ lat: latitude, lng: longitude });
+    mapRef.current?.animateCamera({
+      center: { latitude, longitude },
+      zoom: 15,
+    });
+    try {
+      const data = await olaMapsService.reverseGeocode(latitude, longitude);
+      if (data?.success) {
+        setPickupAddress(data.address);
+      } else {
+        console.log("error while setting result")
+      }
+    } catch (err: any) {
+      if (err.name === "AbortError") return; // request cancelled
+      console.log("Geocode search failed:", err);
+    } finally {
+      console.log("finallyyyyy")
+    }
+
+  };
+
+  // Set Drop using Marker
+  const handleSetDropLocation = async (event: any) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setDrop({ lat: latitude, lng: longitude });
+    mapRef.current?.animateCamera({
+      center: { latitude, longitude },
+      zoom: 15,
+    });
+    try {
+      const data = await olaMapsService.reverseGeocode(latitude, longitude);
+      if (data?.success) {
+        setDropAddress(data.address);
+      } else {
+        console.log("error while setting result")
+      }
+    } catch (err: any) {
+      if (err.name === "AbortError") return; // request cancelled
+      console.log("Geocode search failed:", err);
+    } finally {
+      console.log("finallyyyyy")
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
-      {/* MAP */}
-      <MapView
-        ref={mapRef}
-        style={{ flex: 1 }}
-        onRegionChangeComplete={(region) => {
-          setMapCenter({
-            lat: region.latitude,
-            lng: region.longitude,
-          });
-        }}
-      />
 
-      {/* Center Pin */}
-      <View
-        pointerEvents="none"
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          marginLeft: -12,
-          marginTop: -24,
-          zIndex: 10,
-        }}
-      >
-        <Text style={{ fontSize: 30 }}>📍</Text>
+      <View style={{ flex: 1, zIndex: 1 }}>
+        <MapView
+          provider="google"
+          ref={mapRef} // Pass the map reference
+          style={{ flex: 1 }}
+          showsUserLocation={true} // Shows the user's location marker on the map
+          followsUserLocation={true} // Follows user's location automatically
+          // onPress={(e) => handleMapPress(e)}
+          onPress={handleSetDropLocation}
+        >
+          {/* Center pin, it will be moved to the current location */}
+          {location && (
+            <Marker
+              coordinate={{
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              }}
+              title="You are here"
+              description="This is your current location"
+            />
+          )}
+
+          {/* Marker for pickup */}
+          {pickupCoords !== null && pickupCoords.lat !== null && pickupCoords.lng !== null && (
+            <Marker coordinate={{ latitude: pickupCoords.lat, longitude: pickupCoords.lng }} title="Pickup Location" />
+          )}
+
+          {/* Marker for drop */}
+          {dropCoords !== null && dropCoords.lat !== 0 && dropCoords.lng !== 0 && (
+            <Marker coordinate={{ latitude: dropCoords.lat, longitude: dropCoords.lng }} title="Drop Location" />
+          )}
+        </MapView>
       </View>
-
       {/* BOTTOM SHEET */}
       <Animated.View
         style={[
@@ -161,6 +282,7 @@ const BookingDetailsPage = () => {
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             overflow: "hidden",
+            zIndex: 10
           },
         ]}
       >
@@ -197,27 +319,67 @@ const BookingDetailsPage = () => {
         >
           {!otpHook.isAuthenticated && <PhoneVerificationCard />}
 
-          <LocationSelector
-            label="Pickup"
-            value={pickupCoords}
-            onChange={setPickup}
-            onConfirm={() => {
-              setSelecting("pickup");
-              alert("Tap on the map to set pickup location");
-            }}
-            iconColor="#16a34a"
-          />
 
           <LocationSelector
-            label="Drop"
-            value={dropCoords}
-            onChange={setDrop}
-            onConfirm={() => {
-              setSelecting("drop");
-              alert("Tap on the map to set drop location");
+            label="Pickup"
+            iconColor="#16a34a"
+            onSelectLocation={(coords, address) => {
+              setPickup(coords);
+              setPickupAddress(address)
+
+
+              // Center map to selected location
+              mapRef.current?.animateCamera({
+                center: { latitude: coords.lat, longitude: coords.lng },
+                zoom: 15,
+              });
             }}
-            iconColor="#2563eb"
           />
+          <TouchableOpacity
+            onPress={handleUseCurrentLocation}
+            style={{
+              paddingVertical: 6,
+              paddingHorizontal: 12,
+              backgroundColor: "#4caf50",
+              borderRadius: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 14, fontWeight: "600" }}>
+              Use Current Location
+            </Text>
+          </TouchableOpacity>
+          <LocationSelector
+            label="Drop"
+            iconColor="#2563eb"
+            onSelectLocation={(coords, address) => {
+              setDrop(coords);
+              setDropAddress(address)
+              mapRef.current?.animateCamera({
+                center: { latitude: coords.lat, longitude: coords.lng },
+                zoom: 15,
+              });
+            }}
+          />
+
+          <TouchableOpacity
+            onPress={() => {
+              setDrop(pickupCoords); // Set drop to pickup for testing purposes or handle as needed
+            }}
+            style={{
+              paddingVertical: 6,
+              paddingHorizontal: 12,
+              backgroundColor: "#2563eb",
+              borderRadius: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ color: "white" }}>Use Marker to Set Drop</Text>
+          </TouchableOpacity>
 
           <RideTypeSelector
             selectedRideType={selectedRideType}

@@ -1,19 +1,16 @@
 
-import { MapCoordinates } from "@/services/olaMapsService";
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text } from "react-native";
+import { MapCoordinates } from "@/services/olaMapsService";
+import OlaSearchInput from "./olaSearchInput";
 
 export default function LocationSelector({
   label,
-  value,
-  onChange,
-  onConfirm,
+  onSelectLocation,
   iconColor,
 }: {
   label: string;
-  value: MapCoordinates;
-  onChange: (v: string) => void;
-  onConfirm: () => void;
+  onSelectLocation: (coords: MapCoordinates, address: string) => void;
   iconColor: string;
 }) {
   return (
@@ -28,39 +25,22 @@ export default function LocationSelector({
             borderRadius: 10,
             backgroundColor: iconColor,
             marginRight: 8,
-            marginTop: 4,
           }}
         />
 
-        <TextInput
-          value={String(value)}
-          onChangeText={onChange}
-          placeholder={`Search ${label.toLowerCase()}`}
-          style={{
-            flex: 1,
-            borderWidth: 1,
-            borderColor: "#ccc",
-            padding: 12,
-            borderRadius: 10,
-          }}
-        />
+        <View style={{ flex: 1 }}>
+          <OlaSearchInput
+            placeholder={`Search ${label.toLowerCase()}`}
+            onSelect={(data: any) => {
+              onSelectLocation(
+                { lat: data.lat, lng: data.lng },
+                data.address
+              );
+            }}
+          />
+        </View>
       </View>
-
-      <TouchableOpacity
-        onPress={onConfirm}
-        style={{
-          alignSelf: "flex-end",
-          marginTop: 6,
-          backgroundColor: "#16a34a",
-          paddingVertical: 6,
-          paddingHorizontal: 14,
-          borderRadius: 8,
-        }}
-      >
-        <Text style={{ color: "white", fontWeight: "600", fontSize: 12 }}>
-          Use this location
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 }
+

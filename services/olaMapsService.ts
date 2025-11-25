@@ -50,7 +50,7 @@ export interface ReverseGeocodingResponse {
 }
 
 class OlaMapsService {
-  private baseUrl = '/api/bookings';
+  private baseUrl = `${process.env.EXPO_PUBLIC_API_BASE_URL}/bookings`;
 
   async getRoute(
     pickup: MapCoordinates,
@@ -84,6 +84,7 @@ class OlaMapsService {
 
   async geocode(query: string): Promise<GeocodingResponse | null> {
     try {
+      console.log(this.baseUrl)
       const response = await fetch(`${this.baseUrl}/geocode?q=${encodeURIComponent(query)}`);
 
       if (!response.ok) {
@@ -93,7 +94,7 @@ class OlaMapsService {
       const data = await response.json();
       return data.success ? data : null;
     } catch (error) {
-      console.error('Error geocoding:', error);
+      console.log('Error geocoding:', error);
       return null;
     }
   }

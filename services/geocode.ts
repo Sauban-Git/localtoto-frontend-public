@@ -1,4 +1,4 @@
-import api from "./api"
+import api from "./api";
 
 // Simple in-memory cache with localStorage persistence for geocoding
 type Coords = { lat: number; lng: number };

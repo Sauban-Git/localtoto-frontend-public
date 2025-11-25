@@ -1,4 +1,5 @@
 
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
@@ -33,6 +34,19 @@ export default function useOtpVerification() {
 
     return () => clearInterval(interval);
   }, [otpCooldown]);
+
+  useEffect(() => {
+    const loadAuthState = async () => {
+      const token = await SecureStore.getItemAsync("token");
+      const user = await SecureStore.getItemAsync("user");
+
+      if (token && user) {
+        setIsAuthenticated(true);
+        setPhoneNumber(JSON.parse(user).phoneNumber); // optional
+      }
+    };
+    loadAuthState();
+  }, []);
 
   // ---------------------------
   // SEND OTP
@@ -69,6 +83,7 @@ export default function useOtpVerification() {
       const res = await api.post("/users/send-otp", { phoneNumber });
 
       if (res.data?.success) {
+        console.log(res.data)
         setOtpSent(true);
         setOtpSendCount((v) => v + 1);
         setOtpCooldown(45);
@@ -80,6 +95,7 @@ export default function useOtpVerification() {
         });
       }
     } catch (err: any) {
+      console.log(err)
       setOtpFeedback({
         type: "error",
         message: err?.response?.data?.message || "Failed to send OTP.",
@@ -110,6 +126,7 @@ export default function useOtpVerification() {
       });
 
       if (res.data?.success) {
+        console.log(res.data)
         setIsAuthenticated(true);
         setOtp("");
         setOtpSent(false);
@@ -117,6 +134,13 @@ export default function useOtpVerification() {
           type: "success",
           message: "Phone verified successfully.",
         });
+
+
+        // Persist token, refresh token, and maybe user info
+        await SecureStore.setItemAsync("token", res.data.token);
+        await SecureStore.setItemAsync("refreshToken", res.data.refreshToken);
+        await SecureStore.setItemAsync("user", JSON.stringify(res.data.user));
+        await SecureStore.setItemAsync("phoneVerified", "true"); // optional flag
       } else {
         setOtpFeedback({
           type: "error",
