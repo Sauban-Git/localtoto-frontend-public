@@ -13,7 +13,7 @@ export default function LocationSelector({
   label: string;
   onSelectLocation: (coords: MapCoordinates, address: string) => void;
   iconColor: string;
-  value: string
+  value?: string
 }) {
   return (
     <View style={{ marginBottom: 20 }}>
@@ -32,7 +32,7 @@ export default function LocationSelector({
 
         <View style={{ flex: 1 }}>
           <OlaSearchInput
-            value={value}
+            // value={value}
             placeholder={`Search ${label.toLowerCase()}`}
             onSelect={(data: any) => {
               onSelectLocation(

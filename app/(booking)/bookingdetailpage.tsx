@@ -50,8 +50,7 @@ const BookingDetailsPage = () => {
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
 
-  const { fareSolo, fareShared } = useFareEstimator(pickupCoords, dropCoords);
-
+  const { fareSolo, fareShared } = useFareEstimator(pickupCoords, dropCoords)
   const handleConfirmBooking = () => {
 
     if (!otpHook.isAuthenticated) {
@@ -63,6 +62,7 @@ const BookingDetailsPage = () => {
       alert("Please select pickup and drop locations!");
       return;
     }
+    const routeData = olaMapsService.getRoute(pickupCoords, dropCoords)
 
     const bookingConfirmationData: ConfirmationState = {
       pickupCoords,
@@ -72,6 +72,7 @@ const BookingDetailsPage = () => {
       pickupAddress,
       dropAddress,
       scheduledTime,
+      routeData,
       fare:
         selectedRideType === "private"
           ? fareSolo?.fare
@@ -236,7 +237,6 @@ const BookingDetailsPage = () => {
 
       <View style={{ flex: 1, zIndex: 1 }}>
         <MapView
-          provider="google"
           ref={mapRef} // Pass the map reference
           style={{ flex: 1 }}
           showsUserLocation={true} // Shows the user's location marker on the map

@@ -15,9 +15,9 @@ export default function OlaSearchInput({
     lng: number;
     address: string;
   }) => void;
-  value: string
+  value?: string
 }) {
-  const [query, setQuery] = useState(value);
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export default function OlaSearchInput({
   return (
     <View style={{ width: "100%" }}>
       <TextInput
-        value={value}
+        value={query}
         onChangeText={setQuery}
         placeholder={placeholder}
         style={{

@@ -116,6 +116,7 @@ export default function useRouteAndFare() {
     scheduledDate,
     scheduledTime,
     pageLoading,
+    routeData,
 
     setPickupAddress,
     setDropAddress,

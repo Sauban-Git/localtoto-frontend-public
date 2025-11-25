@@ -53,10 +53,11 @@ class OlaMapsService {
   private baseUrl = `${process.env.EXPO_PUBLIC_API_BASE_URL}/bookings`;
 
   async getRoute(
-    pickup: MapCoordinates,
-    dropoff: MapCoordinates,
+    pickup: MapCoordinates | null,
+    dropoff: MapCoordinates | null,
     options: { mode?: string; waypoints?: MapCoordinates[] } = {}
   ): Promise<RouteResponse | null> {
+
     try {
       const response = await fetch(`${this.baseUrl}/route`, {
         method: 'POST',
@@ -77,7 +78,7 @@ class OlaMapsService {
       const data = await response.json();
       return data.success ? data : null;
     } catch (error) {
-      console.error('Error fetching route:', error);
+      console.log('Error fetching route:', error);
       return null;
     }
   }
@@ -110,7 +111,7 @@ class OlaMapsService {
       const data = await response.json();
       return data.success ? data : null;
     } catch (error) {
-      console.error('Error reverse geocoding:', error);
+      console.log('Error reverse geocoding:', error);
       return null;
     }
   }

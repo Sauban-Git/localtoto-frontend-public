@@ -12,5 +12,6 @@ export interface ConfirmationState {
   dropAddress?: string;
   pickupCoords?: { lat: number; lng: number };
   dropCoords?: { lat: number; lng: number };
+  routeData?: any
 }
 
