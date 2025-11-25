@@ -257,7 +257,7 @@ const BookingDetailsPage = () => {
 
           {/* Marker for pickup */}
           {pickupCoords !== null && pickupCoords.lat !== null && pickupCoords.lng !== null && (
-            <Marker coordinate={{ latitude: pickupCoords.lat, longitude: pickupCoords.lng }} title="Pickup Location" />
+            <Marker coordinate={{ latitude: pickupCoords.lat, longitude: pickupCoords.lng }} title="Pickup Location" pinColor="green" />
           )}
 
           {/* Marker for drop */}

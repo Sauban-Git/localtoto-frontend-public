@@ -82,65 +82,68 @@ const RidingInitiatePage = () => {
 
   // Handle ride booking
   const handleBookRide = async () => {
-    if (!isAuthenticated) {
-      alert('Please verify your phone number first');
-      return;
-    }
-
-    setIsBookingRide(true);
-    setShowBookingAnimation(true);
-    setWaitingTime(0);
-    setCurrentStep(0);
-    setSearchStatus('Finding drivers...');
-    setScanProgress(0);
-
-    try {
-
-      const bookingData = {
-        pickupLocation: { address: data?.pickupAddress, coords: data?.pickupCoords },
-        dropoffLocation: { address: data?.dropAddress, coords: data?.dropCoords },
-        rideType: data?.rideType,
-        paymentMethod: paymentMethod,
-        firstName: 'User',
-        lastName: '',
-        phoneNumber: phoneNumber,
-        scheduledDate: data?.scheduledDate,
-        scheduledTime: data?.scheduledTime,
-        bookingForSelf: data?.rideType === 'private'
-      };
-
-      const response = await api.post('/bookings/book', bookingData);
-
-      if (response.data?.success) {
-        const rideId = response.data.bookingId || response.data.rideId;
-        setBookingId(rideId);
-        // If online, immediately create order and open payment modal
-        if (paymentMethod === 'online') {
-          try {
-            const orderRes = await api.post('/payments/create-order', { bookingId: rideId, amount: amountDue });
-            if (orderRes.data?.success) {
-              setPaymentPending(true);
-              setPaymentOrderId(orderRes.data.orderId);
-              setPaymentId(orderRes.data.paymentId);
-              setPaymentModalOpen(true);
-            }
-          } catch (_) {
-            setPaymentPending(true);
-            setPaymentModalOpen(true);
-          }
-        }
-        // Keep showing the map (waiting room) and poll for driver assignment
-        // We will navigate once a driver confirms the ride
-      } else {
-        alert(response.data?.message || 'Failed to book ride');
-        setShowBookingAnimation(false);
-      }
-    } catch (error: any) {
-      alert(error?.response?.data?.message || 'Failed to book ride');
-      setShowBookingAnimation(false);
-    } finally {
-      setIsBookingRide(false);
-    }
+    // if (!isAuthenticated) {
+    //   alert('Please verify your phone number first');
+    //   return;
+    // }
+    //
+    // setIsBookingRide(true);
+    // setShowBookingAnimation(true);
+    // setWaitingTime(0);
+    // setCurrentStep(0);
+    // setSearchStatus('Finding drivers...');
+    // setScanProgress(0);
+    //
+    // try {
+    //
+    //   const bookingData = {
+    //     pickupLocation: { address: data?.pickupAddress, coords: data?.pickupCoords },
+    //     dropoffLocation: { address: data?.dropAddress, coords: data?.dropCoords },
+    //     rideType: data?.rideType,
+    //     paymentMethod: paymentMethod,
+    //     firstName: 'User',
+    //     lastName: '',
+    //     phoneNumber: phoneNumber,
+    //     scheduledDate: data?.scheduledDate,
+    //     scheduledTime: data?.scheduledTime,
+    //     bookingForSelf: data?.rideType === 'private'
+    //   };
+    //
+    //   const response = await api.post('/bookings/book', bookingData);
+    //
+    //   if (response.data?.success) {
+    //     console.log(response.data)
+    //     const rideId = response.data.bookingId || response.data.rideId;
+    //     setBookingId(rideId);
+    //     // If online, immediately create order and open payment modal
+    //     if (paymentMethod === 'online') {
+    //       try {
+    //         const orderRes = await api.post('/payments/create-order', { bookingId: rideId, amount: amountDue });
+    //         if (orderRes.data?.success) {
+    //           setPaymentPending(true);
+    //           setPaymentOrderId(orderRes.data.orderId);
+    //           setPaymentId(orderRes.data.paymentId);
+    //           setPaymentModalOpen(true);
+    //         }
+    //       } catch (_) {
+    //         setPaymentPending(true);
+    //         setPaymentModalOpen(true);
+    //       }
+    //     }
+    //
+    //     // Keep showing the map (waiting room) and poll for driver assignment
+    //     // We will navigate once a driver confirms the ride
+    //   } else {
+    //     alert(response.data?.message || 'Failed to book ride');
+    //     setShowBookingAnimation(false);
+    //   }
+    // } catch (error: any) {
+    //   alert(error?.response?.data?.message || 'Failed to book ride');
+    //   setShowBookingAnimation(false);
+    // } finally {
+    //   setIsBookingRide(false);
+    // }
+    simulateDriverAssignment()
   };
 
   useEffect(() => {
@@ -323,6 +326,9 @@ const RidingInitiatePage = () => {
 
 
 
+  useEffect(() => {
+    handleBookRide();  // trigger driver simulation immediately
+  }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#000" }}>
