@@ -155,9 +155,6 @@ const BookingDetailsPage = () => {
     getLocation()
   }, [])
 
-  if (location) {
-    console.log("Current location: ", location.coords.latitude, " ", location.coords.longitude)
-  }
 
   useEffect(() => {
     if (location) {
@@ -188,7 +185,7 @@ const BookingDetailsPage = () => {
     });
   };
 
-  // Set Pickup to Current Location
+  // Set Pickup to Marked Location
   const handleUseCurrentLocation = async () => {
     setPickup(markerCoords);
     mapRef.current?.animateCamera({
