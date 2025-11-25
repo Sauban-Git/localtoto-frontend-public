@@ -459,14 +459,14 @@ const RidingInitiatePage = () => {
             <View>
               <Text style={{ color: "#888", fontSize: 12 }}>DISTANCE</Text>
               <Text style={{ color: "#fff", fontSize: 16 }}>
-                {data?.routeData?.distance || "—"}
+                {olaMapsService.formatDistance(data?.routeData?.distance) || "—"}
               </Text>
             </View>
 
             <View>
               <Text style={{ color: "#888", fontSize: 12 }}>DURATION</Text>
               <Text style={{ color: "#fff", fontSize: 16 }}>
-                {data?.routeData?.duration || "—"}
+                {olaMapsService.formatDuration(data?.routeData?.duration) || "—"}
               </Text>
             </View>
           </View>

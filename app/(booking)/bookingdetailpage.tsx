@@ -51,18 +51,14 @@ const BookingDetailsPage = () => {
   const [scheduledTime, setScheduledTime] = useState("");
 
   const { fareSolo, fareShared } = useFareEstimator(pickupCoords, dropCoords)
-  const handleConfirmBooking = () => {
 
-    if (!otpHook.isAuthenticated) {
-      alert("Please verify your phone first!");
-      return;
-    }
+  const handleConfirmBooking = async () => {
 
     if (!pickupCoords || !dropCoords) {
       alert("Please select pickup and drop locations!");
       return;
     }
-    const routeData = olaMapsService.getRoute(pickupCoords, dropCoords)
+    const routeData = await olaMapsService.getRoute(pickupCoords, dropCoords)
 
     const bookingConfirmationData: ConfirmationState = {
       pickupCoords,
@@ -83,7 +79,7 @@ const BookingDetailsPage = () => {
 
     setRideData(bookingConfirmationData);
 
-    router.push("/(booking)/bookingConfirmationPage")
+    router.push("/(riding)/ridingInitiate")
   };
 
   // Bottom sheet animation states

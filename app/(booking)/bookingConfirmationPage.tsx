@@ -1,6 +1,7 @@
 
+import { DriverLocation, RouteResponse } from "@/services/olaMapsService";
 import { useRideStore } from "@/stores/bookingConfirmStore";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native"
 
 const BookingConfirmationPage = () => {
@@ -26,9 +27,9 @@ const BookingConfirmationPage = () => {
   const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [wsRetryLimitReached, setWsRetryLimitReached] = useState(false);
-  const wsRetriesRef = React.useRef(0);
-  const shouldReconnectRef = React.useRef(true);
-  const isConnectingRef = React.useRef(false);
+  const wsRetriesRef = useRef(0);
+  const shouldReconnectRef = useRef(true);
+  const isConnectingRef = useRef(false);
   const [isCompleted, setIsCompleted] = useState(false); // Flag to prevent unnecessary API calls
   const [userPhone, setUserPhone] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
