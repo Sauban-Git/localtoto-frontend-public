@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master # or your default branch
+    paths:
+      - "android/**"
   workflow_dispatch:
 
 jobs:
