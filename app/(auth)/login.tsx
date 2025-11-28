@@ -46,6 +46,7 @@ const Login = () => {
       />
 
       <MyButton title="Sign In" onPress={handleSubmit} />
+      <MyButton title="Become a Rider" onPress={() => router.replace('/(rider)/becomeRider')} />
 
       <View style={styles.signupTextContainer}>
         <Text style={{ color: c.text }}>New here? </Text>

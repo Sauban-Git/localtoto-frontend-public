@@ -1,13 +1,13 @@
 
+import Step1Personal from '@/components/screens/step1Personal';
+import Step3Documents from '@/components/screens/step2Documents';
+import Step2Vehicle from '@/components/screens/step2Vehicle';
+import StepIndicator from '@/components/stepIndicator';
 import api from '@/services/api';
 import React, { useState } from 'react';
 import { View, Button, Text, ScrollView } from 'react-native';
-import StepIndicator from './stepIndicator';
-import Step1Personal from './screens/step1Personal';
-import Step2Vehicle from './screens/step2Vehicle';
-import Step3Documents from './screens/step2Documents';
 
-export default function BecomeRiderScreen() {
+const BecomeRider = () => {
   const [step, setStep] = useState(1);
 
   const [form, setForm] = useState<any>({
@@ -133,3 +133,5 @@ export default function BecomeRiderScreen() {
     </ScrollView>
   );
 }
+
+export default BecomeRider
