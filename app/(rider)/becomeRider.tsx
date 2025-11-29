@@ -3,6 +3,7 @@ import Step1Personal from '@/components/screens/step1Personal';
 import Step3Documents from '@/components/screens/step2Documents';
 import Step2Vehicle from '@/components/screens/step2Vehicle';
 import StepIndicator from '@/components/stepIndicator';
+import useRiderOtpVerification from '@/hooks/useRiderOtpVerification';
 import api from '@/services/api';
 import React, { useState } from 'react';
 import { View, Button, Text, ScrollView } from 'react-native';
@@ -21,47 +22,6 @@ const BecomeRider = () => {
     panCard: null,
     aadhaarCard: null
   });
-
-  // OTP STATES
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [otpMessage, setOtpMessage] = useState('');
-  const [sending, setSending] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-
-  // Send OTP
-  const sendOtp = async () => {
-    try {
-      setSending(true);
-      await api.post('/riders/send-otp', { phoneNumber: form.phone });
-      setOtpSent(true);
-      setOtpMessage("OTP Sent");
-    } catch {
-      setOtpMessage("Failed to send OTP");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  // Verify OTP
-  const verifyOtp = async () => {
-    try {
-      setVerifying(true);
-      const res = await api.post('/riders/verify-otp', {
-        phoneNumber: form.phone,
-        otp
-      });
-      if (res.data.success) {
-        setPhoneVerified(true);
-        setOtpMessage("Phone Verified!");
-      }
-    } catch {
-      setOtpMessage("Invalid OTP");
-    } finally {
-      setVerifying(false);
-    }
-  };
 
   const submit = async () => {
     const data = new FormData();
@@ -85,6 +45,8 @@ const BecomeRider = () => {
     setStep(4);
   };
 
+  const phoneVerified = useRiderOtpVerification().isAuthenticated
+
   return (
     <ScrollView contentContainerStyle={{ padding: 20 }}>
       <StepIndicator step={step} />
@@ -93,15 +55,6 @@ const BecomeRider = () => {
         <Step1Personal
           form={form}
           setForm={setForm}
-          phoneVerified={phoneVerified}
-          sendOtp={sendOtp}
-          verifyOtp={verifyOtp}
-          otp={otp}
-          setOtp={setOtp}
-          otpMessage={otpMessage}
-          otpSent={otpSent}
-          sending={sending}
-          verifying={verifying}
         />
       )}
 

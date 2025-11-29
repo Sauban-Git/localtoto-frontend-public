@@ -6,7 +6,7 @@ import { Pressable, Text, StyleSheet } from "react-native";
 export default function MyButton({ title, onPress }: { title: string, onPress: () => void }) {
   const c = useColors()
   return (
-    <Pressable style={[styles.button, { backgroundColor: c.background, borderColor: c.border }]} onPress={onPress}>
+    <Pressable style={[styles.button, { backgroundColor: c.background, borderColor: c.border, borderWidth: 2 }]} onPress={onPress}>
       <Text style={[styles.buttonText, { color: c.text }]}>{title}</Text>
     </Pressable>
   );

@@ -1,4 +1,8 @@
 
+import {
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import olaMapsService, { MapCoordinates, ReverseGeocodingResponse } from "@/services/olaMapsService";
 import * as IntentLauncher from "expo-intent-launcher";
 import * as Location from "expo-location"
@@ -6,11 +10,13 @@ import * as SecureStore from "expo-secure-store";
 import AnimatedBackground from '@/components/animatedBackground'
 import { useRideStore } from '@/stores/bookingConfirmStore'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text } from 'react-native'
 import api from "@/services/api";
 import useOtpVerification from "@/hooks/useOtpVerification";
 import { router } from "expo-router";
 import MyButton from "@/components/button";
+import WaveBlobProgress from '@/components/waveBlogProgress';
+
 
 type LocationState = Location.LocationObject | null;
 
@@ -22,7 +28,6 @@ const RidingInitiatePage = () => {
   const razorpayKey = process.env?.VITE_RAZORPAY_KEY_ID as string | undefined;
 
   const {
-    isAuthenticated,
     phoneNumber,
     setPhoneNumber,
   } = useOtpVerification();
@@ -67,6 +72,8 @@ const RidingInitiatePage = () => {
   const MAX_WAIT_SECONDS = 180; // 3 minutes
   const [expired, setExpired] = useState<boolean>(false);
   const [bootLoading, setBootLoading] = useState<boolean>(true);
+  const progress = useSharedValue<number>(0);
+
 
   // Distance warning states
   const [location, setLocation] = useState<LocationState>(null)
@@ -87,8 +94,6 @@ const RidingInitiatePage = () => {
     //   alert('Please verify your phone number first');
     //   return;
     // }
-    console.log("Entered booking...")
-
     setIsBookingRide(true);
     setShowBookingAnimation(true);
     setWaitingTime(0);
@@ -114,8 +119,9 @@ const RidingInitiatePage = () => {
       const response = await api.post('/bookings/book', bookingData);
 
       if (response.data?.success) {
-        console.log("booking success: ", response.data)
-        const rideId = response.data.bookingId || response.data.rideId;
+        console.log(response.data)
+        const rideId = response.data.rideId;
+        console.log("RideId: ", rideId)
         setBookingId(rideId);
         // If online, immediately create order and open payment modal
         if (paymentMethod === 'online') {
@@ -232,6 +238,7 @@ const RidingInitiatePage = () => {
 
   // fetch drivers on regular interval
   useEffect(() => {
+    if (!showBookingAnimation || expired || driverAssigned === true) return;
     let cancelled = false;
     let timer: number | null = null;
     const load = async () => {
@@ -241,6 +248,8 @@ const RidingInitiatePage = () => {
           params.lat = location.coords.latitude; params.lng = location.coords.longitude;
         }
         const res = await api.get('/riders/online-drivers', { params });
+
+        console.log("riders..Searching: ", res.data)
         const backendCount = typeof res.data?.count === 'number' ? res.data.count : 0;
         const drivers = Array.isArray(res.data?.drivers) ? res.data.drivers : [];
         if (!cancelled) { setOnlineDrivers(drivers); setOnlineCount(backendCount); }
@@ -335,14 +344,43 @@ const RidingInitiatePage = () => {
     router.push('/(riding)/liveTrackMap')
   }
 
+  const cancelBooking = async () => {
+    if (bookingId) return;
+    try {
+      await api.post(`/bookings/cancel/${bookingId}`);
+    } catch (e: any) {
+      alert(e?.response?.data?.message || 'Failed to cancel ride');
+    } finally {
+    }
+    router.replace('/(booking)/bookingdetailpage')
+  };
 
 
   useEffect(() => {
     handleBookRide();  // trigger driver simulation immediately
   }, []);
 
+  // ⏳ 1-second timer to track total wait time during search
+  useEffect(() => {
+    if (!showBookingAnimation || expired) return;
+
+    const interval = setInterval(() => {
+      setWaitingTime(prev => prev + 1);
+      setScanProgress(prev => Math.min(prev + 1, 100));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showBookingAnimation, expired]);
+
+  // animation progressbar
+  useEffect(() => {
+    const percentage = (waitingTime / MAX_WAIT_SECONDS) * 100;
+
+    progress.value = withTiming(percentage, { duration: 500 });
+  }, [waitingTime]);
+
   return (
-    <View style={{ flex: 1, backgroundColor: "#000" }}>
+    <View style={{ flex: 1 }}>
       <AnimatedBackground />
 
       {/* DRIVER FOUND UI */}
@@ -406,67 +444,55 @@ const RidingInitiatePage = () => {
 
           {/* Header */}
           <View style={{ marginBottom: 40, alignItems: "center" }}>
-            <Text style={{ fontSize: 22, color: "#fff", fontWeight: "600" }}>
+            <Text style={{ fontSize: 22, color: "#000000", fontWeight: "600" }}>
               {expired ? "No Drivers Found" : "Searching for drivers..."}
             </Text>
 
             {!expired && (
-              <Text style={{ marginTop: 6, color: "#aaa" }}>
+              <Text style={{ marginTop: 6, color: "#000000" }}>
                 We’re connecting you with the nearest driver
               </Text>
             )}
           </View>
 
           {/* Searching Loader Animation */}
-          {!expired && (
+          {!expired ? (
             <View style={{ alignItems: "center", marginBottom: 50 }}>
-              <View
-                style={{
-                  width: 140,
-                  height: 140,
-                  borderRadius: 100,
-                  borderWidth: 8,
-                  borderColor: "#2ecc71",
-                  borderStyle: "dotted",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "white", fontSize: 16 }}>
-                  {scanProgress}%
-                </Text>
-              </View>
+              <WaveBlobProgress progress={progress} />
 
-              <Text style={{ marginTop: 12, color: "#ccc" }}>
+              <Text style={{ marginTop: 12, color: "#000000", alignItems: 'center', textAlign: 'center' }}>
                 {searchStatus}
               </Text>
             </View>
-          )}
+          ) : (<>
+            <MyButton onPress={simulateDriverAssignment} title="Simulate Driver (Fake)" />
+            <MyButton onPress={cancelBooking} title="Cancel Booking" />
+          </>)}
 
           {/* Pickup / Drop Info */}
+
           <View
             style={{
-              backgroundColor: "#111",
+              backgroundColor: "#1abc9c", // softer green
               padding: 20,
               borderRadius: 12,
               marginBottom: 30,
             }}
           >
-            <Text style={{ color: "#888", fontSize: 12 }}>PICKUP</Text>
+            <Text style={{ color: "#555", fontSize: 12 }}>PICKUP</Text>
             <Text style={{ color: "#fff", fontSize: 16, marginBottom: 10 }}>
               {data?.pickupAddress}
             </Text>
 
-            <Text style={{ color: "#888", fontSize: 12 }}>DROP</Text>
+            <Text style={{ color: "#555", fontSize: 12 }}>DROP</Text>
             <Text style={{ color: "#fff", fontSize: 16 }}>
               {data?.dropAddress}
             </Text>
           </View>
 
-          {/* Distance Section */}
           <View
             style={{
-              backgroundColor: "#111",
+              backgroundColor: "#1abc9c",
               padding: 15,
               borderRadius: 12,
               marginBottom: 20,
@@ -475,19 +501,20 @@ const RidingInitiatePage = () => {
             }}
           >
             <View>
-              <Text style={{ color: "#888", fontSize: 12 }}>DISTANCE</Text>
+              <Text style={{ color: "#555", fontSize: 12 }}>DISTANCE</Text>
               <Text style={{ color: "#fff", fontSize: 16 }}>
                 {olaMapsService.formatDistance(data?.routeData?.distance) || "—"}
               </Text>
             </View>
 
             <View>
-              <Text style={{ color: "#888", fontSize: 12 }}>DURATION</Text>
+              <Text style={{ color: "#555", fontSize: 12 }}>DURATION</Text>
               <Text style={{ color: "#fff", fontSize: 16 }}>
                 {olaMapsService.formatDuration(data?.routeData?.duration) || "—"}
               </Text>
             </View>
           </View>
+
 
           {/* If Wait Time Expired */}
           {expired && (
