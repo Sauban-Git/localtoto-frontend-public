@@ -7,7 +7,6 @@ import { View, TextInput, TouchableOpacity, Text, ScrollView, ActivityIndicator 
 export default function OlaSearchInput({
   placeholder,
   onSelect,
-  value,
 }: {
   placeholder: string;
   onSelect: (location: {
@@ -15,16 +14,17 @@ export default function OlaSearchInput({
     lng: number;
     address: string;
   }) => void;
-  value?: string
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSelected, setIsSelected] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    if (isSelected) return;
     if (!query || query.length < 2) {
       setResults([]);
       setError(null);
@@ -62,9 +62,10 @@ export default function OlaSearchInput({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query]);
+  }, [query, isSelected]);
 
   const handleSelect = (item: GeocodeResult) => {
+    setIsSelected(true)
     const withinService = isWithinServiceArea(item.lat, item.lng);
     onSelect({
       lat: item.lat,

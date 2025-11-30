@@ -7,8 +7,6 @@ import OlaSearchInput from "./olaSearchInput";
 export default function LocationSelector({
   label,
   onSelectLocation,
-  iconColor,
-  value,
 }: {
   label: string;
   onSelectLocation: (coords: MapCoordinates, address: string) => void;
@@ -16,20 +14,10 @@ export default function LocationSelector({
   value?: string
 }) {
   return (
-    <View style={{ marginBottom: 20 }}>
-      <Text style={{ fontSize: 12, color: "#555", marginBottom: 4 }}>{label}</Text>
+    <View style={{ paddingHorizontal: 10, paddingTop: 20 }}>
+      <Text style={{ fontSize: 12, color: "#ffffff", marginBottom: 4 }}>{label}</Text>
 
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 10,
-            backgroundColor: iconColor,
-            marginRight: 8,
-          }}
-        />
-
         <View style={{ flex: 1 }}>
           <OlaSearchInput
             // value={value}

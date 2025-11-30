@@ -6,7 +6,7 @@ import { Pressable, Text, StyleSheet } from "react-native";
 export default function MyButton({ title, onPress }: { title: string, onPress: () => void }) {
   const c = useColors()
   return (
-    <Pressable style={[styles.button, { backgroundColor: c.background, borderColor: c.border, borderWidth: 2 }]} onPress={onPress}>
+    <Pressable style={styles.button} onPress={onPress}>
       <Text style={[styles.buttonText, { color: c.text }]}>{title}</Text>
     </Pressable>
   );
@@ -14,11 +14,14 @@ export default function MyButton({ title, onPress }: { title: string, onPress: (
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    backgroundColor: "green",
+    padding: 12,
+    marginHorizontal: 10,
+    borderColor: "#ccc",
     borderRadius: 10,
+    borderWidth: 1,
     alignItems: "center",
-    marginVertical: 6,
+    marginTop: 40,
   },
   buttonText: {
     fontSize: 18,

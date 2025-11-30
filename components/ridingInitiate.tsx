@@ -12,11 +12,11 @@ import { useRideStore } from '@/stores/bookingConfirmStore'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text } from 'react-native'
 import api from "@/services/api";
-import useOtpVerification from "@/hooks/useOtpVerification";
 import { router } from "expo-router";
 import MyButton from "@/components/button";
 import WaveBlobProgress from '@/components/waveBlogProgress';
 import { useBookingStateStore } from '@/stores/rideStore';
+const [location, setLocation] = useState<LocationState>(null)
 
 
 type LocationState = Location.LocationObject | null;

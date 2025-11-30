@@ -19,7 +19,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import olaMapsService, { MapCoordinates } from "@/services/olaMapsService";
-import { ConfirmationState } from "@/types/type"
 import { useRideStore } from "@/stores/bookingConfirmStore";
 
 type LocationState = Location.LocationObject | null;

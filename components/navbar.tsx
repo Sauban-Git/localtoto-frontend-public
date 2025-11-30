@@ -1,8 +1,8 @@
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { usePathname, useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { isAllowedAdmin } from "@/config/adminConfig";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Options } from "./options";
@@ -59,17 +59,17 @@ export default NavBar
 
 
 const styles = StyleSheet.create({
+
   navbar: {
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 12,
-    position: "absolute",
-    top: 0,
     zIndex: 50,
     backgroundColor: "transparent",
   },
+
   navbarSolid: {
     backgroundColor: "white",
     shadowColor: "#000",

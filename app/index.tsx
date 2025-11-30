@@ -21,7 +21,7 @@ const SplashScreen = () => {
       <Animated.Text entering={FadeIn.duration(700)} style={[styles.title, { color: c.highlight }]}>Auto Booking{" "}</Animated.Text>
       <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text1, { color: c.highlight }]}>First e-Vehicle Mobility app</Animated.Text>
 
-      <MyButton onPress={() => router.replace('/(booking)/bookingdetailpage')} title="GET STARTED" />
+      <MyButton onPress={() => router.replace('/(tabs)/home')} title="GET STARTED" />
 
       <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text2, { color: c.highlight }]}>App by the drivers for the people</Animated.Text>
       <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text, { color: c.highlight }]}>Safety is our first priority</Animated.Text>
