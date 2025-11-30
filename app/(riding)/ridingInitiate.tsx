@@ -501,14 +501,14 @@ const RidingInitiatePage = () => {
             }}
           >
             <View>
-              <Text style={{ color: "#555", fontSize: 12 }}>DISTANCE</Text>
+              <Text style={{ color: "#555", fontSize: 12 }}>DISTANCE{" "}</Text>
               <Text style={{ color: "#fff", fontSize: 16 }}>
                 {olaMapsService.formatDistance(data?.routeData?.distance) || "—"}
               </Text>
             </View>
 
             <View>
-              <Text style={{ color: "#555", fontSize: 12 }}>DURATION</Text>
+              <Text style={{ color: "#555", fontSize: 12 }}>DURATION{" "}</Text>
               <Text style={{ color: "#fff", fontSize: 16 }}>
                 {olaMapsService.formatDuration(data?.routeData?.duration) || "—"}
               </Text>
@@ -519,8 +519,8 @@ const RidingInitiatePage = () => {
           {/* If Wait Time Expired */}
           {expired && (
             <View style={{ alignItems: "center", marginTop: 30 }}>
-              <Text style={{ color: "#ff5555", fontSize: 16, marginBottom: 20 }}>
-                No drivers available right now.
+              <Text style={{ color: "#ff5555", fontSize: 16, marginBottom: 20, alignItems: "center", textAlign: "center" }}>
+                No drivers available right now.{" "}
               </Text>
 
               <View

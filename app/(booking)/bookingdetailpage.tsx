@@ -1,4 +1,5 @@
 
+import * as SecureStore from "expo-secure-store";
 import * as IntentLauncher from "expo-intent-launcher";
 import * as Location from "expo-location"
 import MapView, { Marker } from "react-native-maps";
@@ -18,7 +19,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import olaMapsService, { MapCoordinates, ReverseGeocodingResponse } from "@/services/olaMapsService";
+import olaMapsService, { MapCoordinates } from "@/services/olaMapsService";
 import { ConfirmationState } from "@/types/type"
 import { useRideStore } from "@/stores/bookingConfirmStore";
 
@@ -108,14 +109,12 @@ const BookingDetailsPage = () => {
     .onUpdate((e) => {
       const newY = startY.value + e.translationY;
       translateY.value = Math.min(
-        Math.max(newY, SNAP_TOP),
+        Math.max(newY, SNAP_MID),
         SNAP_BOTTOM
       );
     })
     .onEnd(() => {
-      if (translateY.value < SNAP_MID) {
-        translateY.value = withSpring(SNAP_TOP);
-      } else if (translateY.value < SNAP_BOTTOM - 100) {
+      if (translateY.value < (SNAP_MID + SNAP_BOTTOM) / 2) {
         translateY.value = withSpring(SNAP_MID);
       } else {
         translateY.value = withSpring(SNAP_BOTTOM);
@@ -274,7 +273,7 @@ const BookingDetailsPage = () => {
             position: "absolute",
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: 20,
             height: height * 0.9,
             backgroundColor: "white",
             borderTopLeftRadius: 20,
@@ -315,95 +314,106 @@ const BookingDetailsPage = () => {
             paddingBottom: 200,
           }}
         >
-          {!otpHook.isAuthenticated && <PhoneVerificationCard />}
+          {!otpHook.isAuthenticated ? (<PhoneVerificationCard />) :
+            (pickupCoords === null && dropCoords === null) ?
+              (<><LocationSelector
+                label="Pickup"
+                iconColor="#16a34a"
+                value={pickupAddress}
+                onSelectLocation={(coords, address) => {
+                  setPickup(coords);
+                  setPickupAddress(address)
 
 
-          <LocationSelector
-            label="Pickup"
-            iconColor="#16a34a"
-            value={pickupAddress}
-            onSelectLocation={(coords, address) => {
-              setPickup(coords);
-              setPickupAddress(address)
+                  // Center map to selected location
+                  mapRef.current?.animateCamera({
+                    center: { latitude: coords.lat, longitude: coords.lng },
+                    zoom: 15,
+                  });
+                }}
+              />
+                <TouchableOpacity
+                  onPress={handleUseCurrentLocation}
+                  style={{
+                    paddingVertical: 6,
+                    paddingHorizontal: 12,
+                    backgroundColor: "#4caf50",
+                    borderRadius: 8,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 20,
+                  }}
+                >
+                  <Text style={{ color: "white", fontSize: 14, fontWeight: "600" }}>
+                    Use Current Location
+                  </Text>
+                </TouchableOpacity>
+              </>) :
+              (pickupCoords !== null && dropCoords === null) ?
+                (<>
+                  <LocationSelector
+                    label="Drop"
+                    value={dropAddress}
+                    iconColor="#2563eb"
+                    onSelectLocation={(coords, address) => {
+                      setDrop(coords);
+                      setDropAddress(address)
+                      mapRef.current?.animateCamera({
+                        center: { latitude: coords.lat, longitude: coords.lng },
+                        zoom: 15,
+                      });
+                    }}
+                  />
+
+                  <TouchableOpacity
+                    onPress={handleSetDropLocation}
+                    style={{
+                      paddingVertical: 6,
+                      paddingHorizontal: 12,
+                      backgroundColor: "#2563eb",
+                      borderRadius: 8,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 20,
+                    }}
+                  >
+                    <Text style={{ color: "white" }}>Use Marker to Set Drop</Text>
+                  </TouchableOpacity>
+                </>
+                ) : (
+                  <>
+                    <RideTypeSelector
+                      selectedRideType={selectedRideType}
+                      setSelectedRideType={setSelectedRideType}
+                      fareSolo={fareSolo}
+                      fareShared={fareShared}
+                      scheduledDate={scheduledDate}
+                      scheduledTime={scheduledTime}
+                      setScheduledDate={setScheduledDate}
+                      setScheduledTime={setScheduledTime}
+                    />
+
+                    <TouchableOpacity
+                      onPress={handleConfirmBooking}
+                      style={{
+                        marginTop: 20,
+                        backgroundColor: "#16a34a",
+                        padding: 16,
+                        borderRadius: 12,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>
+                        Confirm Booking
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                )
+
+          }
 
 
-              // Center map to selected location
-              mapRef.current?.animateCamera({
-                center: { latitude: coords.lat, longitude: coords.lng },
-                zoom: 15,
-              });
-            }}
-          />
-          <TouchableOpacity
-            onPress={handleUseCurrentLocation}
-            style={{
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              backgroundColor: "#4caf50",
-              borderRadius: 8,
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 20,
-            }}
-          >
-            <Text style={{ color: "white", fontSize: 14, fontWeight: "600" }}>
-              Use Current Location
-            </Text>
-          </TouchableOpacity>
-          <LocationSelector
-            label="Drop"
-            value={dropAddress}
-            iconColor="#2563eb"
-            onSelectLocation={(coords, address) => {
-              setDrop(coords);
-              setDropAddress(address)
-              mapRef.current?.animateCamera({
-                center: { latitude: coords.lat, longitude: coords.lng },
-                zoom: 15,
-              });
-            }}
-          />
 
-          <TouchableOpacity
-            onPress={handleSetDropLocation}
-            style={{
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              backgroundColor: "#2563eb",
-              borderRadius: 8,
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 20,
-            }}
-          >
-            <Text style={{ color: "white" }}>Use Marker to Set Drop</Text>
-          </TouchableOpacity>
-
-          <RideTypeSelector
-            selectedRideType={selectedRideType}
-            setSelectedRideType={setSelectedRideType}
-            fareSolo={fareSolo}
-            fareShared={fareShared}
-            scheduledDate={scheduledDate}
-            scheduledTime={scheduledTime}
-            setScheduledDate={setScheduledDate}
-            setScheduledTime={setScheduledTime}
-          />
-
-          <TouchableOpacity
-            onPress={handleConfirmBooking}
-            style={{
-              marginTop: 20,
-              backgroundColor: "#16a34a",
-              padding: 16,
-              borderRadius: 12,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>
-              Confirm Booking
-            </Text>
-          </TouchableOpacity>
         </Animated.ScrollView>
       </Animated.View>
     </View>
