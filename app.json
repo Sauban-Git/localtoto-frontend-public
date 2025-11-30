@@ -13,6 +13,11 @@
       "bundleIdentifier": "com.anonymous.frontendpubliclocaltot"
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB0k38cWEOuM4jQyRl9dWR_rYgymaAMTfU"
+        }
+      },
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

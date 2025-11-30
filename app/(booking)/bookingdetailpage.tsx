@@ -1,7 +1,7 @@
 
 import * as IntentLauncher from "expo-intent-launcher";
 import * as Location from "expo-location"
-import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import MapView, { Marker, PROVIDER_DEFAULT, PROVIDER_GOOGLE } from "react-native-maps";
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
@@ -233,7 +233,7 @@ const BookingDetailsPage = () => {
         <MapView
           ref={mapRef} // Pass the map reference
           style={{ flex: 1 }}
-          provider={PROVIDER_DEFAULT}
+          provider={PROVIDER_GOOGLE}
           showsUserLocation={true} // Shows the user's location marker on the map
           followsUserLocation={true} // Follows user's location automatically
           onPress={(e) => handleMapPress(e)}
