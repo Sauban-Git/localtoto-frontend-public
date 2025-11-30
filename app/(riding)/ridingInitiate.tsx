@@ -16,6 +16,7 @@ import useOtpVerification from "@/hooks/useOtpVerification";
 import { router } from "expo-router";
 import MyButton from "@/components/button";
 import WaveBlobProgress from '@/components/waveBlogProgress';
+import { useBookingStateStore } from '@/stores/rideStore';
 
 
 type LocationState = Location.LocationObject | null;
@@ -27,15 +28,17 @@ const RidingInitiatePage = () => {
 
   const razorpayKey = process.env?.VITE_RAZORPAY_KEY_ID as string | undefined;
 
-  const {
-    phoneNumber,
-    setPhoneNumber,
-  } = useOtpVerification();
+  const [phoneNumber, setPhoneNumber] = useState("")
 
   // Booking states
   const [isBookingRide, setIsBookingRide] = useState<boolean>(false);
-  const [showBookingAnimation, setShowBookingAnimation] = useState<boolean>(false);
-  const [bookingId, setBookingId] = useState<string | null>(null);
+
+  const bookingId = useBookingStateStore((s: any) => s.bookingId);
+  const setBookingId = useBookingStateStore((s: any) => s.setBookingId);
+
+  const showBookingAnimation = useBookingStateStore((s: any) => s.showBookingAnimation);
+  const setShowBookingAnimation = useBookingStateStore((s: any) => s.setShowBookingAnimation);
+
   const [driverAssigned, setDriverAssigned] = useState<boolean>(false);
   const navigatedRef = useRef<boolean>(false);
   const [driverInfo, setDriverInfo] = useState<any>(null);
@@ -90,15 +93,15 @@ const RidingInitiatePage = () => {
 
   // Handle ride booking
   const handleBookRide = async () => {
-    // if (!isAuthenticated) {
-    //   alert('Please verify your phone number first');
-    //   return;
-    // }
+    if (!phoneNumber) {
+      console.log("First verifying phone")
+      return;
+    }
     setIsBookingRide(true);
     setShowBookingAnimation(true);
     setWaitingTime(0);
     setCurrentStep(0);
-    setSearchStatus('Finding drivers...');
+    setSearchStatus('Finding drivers ');
     setScanProgress(0);
 
     try {
@@ -115,6 +118,8 @@ const RidingInitiatePage = () => {
         scheduledTime: data?.scheduledTime,
         bookingForSelf: data?.rideType === 'private'
       };
+
+      console.log("data: ", bookingData)
 
       const response = await api.post('/bookings/book', bookingData);
 
@@ -145,11 +150,12 @@ const RidingInitiatePage = () => {
         // Keep showing the map (waiting room) and poll for driver assignment
         // We will navigate once a driver confirms the ride
       } else {
-        alert(response.data?.message || 'Failed to book ride');
         console.log("backend gave error.. trying simulate now")
+        alert(response.data?.message || 'Failed to book ride');
         simulateDriverAssignment()
       }
     } catch (error: any) {
+      console.log("erorrr: ", error)
       alert(error?.response?.data?.message || 'Failed to book ride');
       setShowBookingAnimation(false);
     } finally {
@@ -238,7 +244,7 @@ const RidingInitiatePage = () => {
 
   // fetch drivers on regular interval
   useEffect(() => {
-    if (!showBookingAnimation || expired || driverAssigned === true) return;
+    if (expired || driverAssigned === true) return;
     let cancelled = false;
     let timer: number | null = null;
     const load = async () => {
@@ -357,8 +363,10 @@ const RidingInitiatePage = () => {
 
 
   useEffect(() => {
-    handleBookRide();  // trigger driver simulation immediately
-  }, []);
+    if (phoneNumber && !bookingId) {
+      handleBookRide();
+    }  // trigger driver simulation immediately
+  }, [phoneNumber]);
 
   // ⏳ 1-second timer to track total wait time during search
   useEffect(() => {

@@ -315,7 +315,7 @@ const BookingDetailsPage = () => {
           }}
         >
           {!otpHook.isAuthenticated ? (<PhoneVerificationCard />) :
-            (pickupCoords === null && dropCoords === null) ?
+            !pickupCoords ?
               (<><LocationSelector
                 label="Pickup"
                 iconColor="#16a34a"
@@ -349,7 +349,7 @@ const BookingDetailsPage = () => {
                   </Text>
                 </TouchableOpacity>
               </>) :
-              (pickupCoords !== null && dropCoords === null) ?
+              !dropCoords ?
                 (<>
                   <LocationSelector
                     label="Drop"
