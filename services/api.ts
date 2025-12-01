@@ -14,7 +14,7 @@ const storage = {
 let rideFlowFlag = false;
 
 // Base URL
-const baseURL = process.env?.EXPO_PUBLIC_API_BASE_URL;
+const baseURL = __DEV__ ? `${process.env?.EXPO_PUBLIC_API_BASE_URL}/api` : process.env?.EXPO_PUBLIC_API_BASE_URL;
 
 if (!baseURL) {
   console.warn("[API] EXPO_PUBLIC_API_BASE_URL is not defined!");
