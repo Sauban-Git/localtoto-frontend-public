@@ -22,7 +22,7 @@ export const Options: React.FC<OptionsProps> = ({ isOpen, onClose }) => {
     <View style={styles.overlay}>
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
       <View style={styles.popup}>
-        <TouchableOpacity style={styles.option} onPress={() => { }}>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(tabs)/home') }}>
           <Text style={styles.optionText}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.option} onPress={() => { }}>
@@ -31,12 +31,12 @@ export const Options: React.FC<OptionsProps> = ({ isOpen, onClose }) => {
         <TouchableOpacity style={styles.option} onPress={() => { }}>
           <Text style={styles.optionText}>Safety</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option} onPress={() => { }}>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/about') }}>
           <Text style={styles.optionText}>About</Text>
-        </TouchableOpacity><TouchableOpacity style={styles.option} onPress={() => { }}>
+        </TouchableOpacity><TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/becomeRider') }}>
           <Text style={styles.optionText}>Become a Rider</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option} onPress={() => { }}>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/faqs') }}>
           <Text style={styles.optionText}>FAQs</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.option} onPress={() => { }}>
@@ -53,7 +53,7 @@ export const Options: React.FC<OptionsProps> = ({ isOpen, onClose }) => {
 const styles = StyleSheet.create({
   overlay: {
     position: "absolute",
-    top: 0,
+    top: 20,
     left: 0,
     right: 0,
     bottom: 0,

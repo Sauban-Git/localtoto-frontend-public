@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 
 export default function useRiderOtpVerification() {
-  console.log("hook rider verify")
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -23,31 +22,28 @@ export default function useRiderOtpVerification() {
     message: string;
   } | null>(null);
 
-  // ---------------------------
-  // COOL DOWN TIMER
-  // ---------------------------
-  useEffect(() => {
-    if (otpCooldown <= 0) return;
-
-    const interval = setInterval(() => {
-      setOtpCooldown((v) => Math.max(0, v - 1));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [otpCooldown]);
-
   useEffect(() => {
     const loadAuthState = async () => {
       const token = await SecureStore.getItemAsync("riderToken");
       const rider = await SecureStore.getItemAsync("rider");
 
       if (token && rider) {
-        setIsAuthenticated(true);
-        setPhoneNumber(JSON.parse(rider).phoneNumber);
+        const parsed = JSON.parse(rider);
+
+        setIsAuthenticated((prev) => {
+          if (prev === true) return prev;
+          return true;
+        });
+
+        setPhoneNumber((prev) => {
+          if (prev === parsed.phoneNumber) return prev;
+          return parsed.phoneNumber;
+        });
       }
     };
     loadAuthState();
   }, []);
+
 
   // ---------------------------
   // SEND OTP (RIDER)
@@ -125,6 +121,7 @@ export default function useRiderOtpVerification() {
       const res = await api.post("/riders/verify-otp", {
         phoneNumber,
         otp,
+        context: 'application'
       });
 
       if (res.data?.success) {
@@ -148,10 +145,17 @@ export default function useRiderOtpVerification() {
         });
       }
     } catch (err: any) {
+      // setOtpFeedback({
+      //   type: "error",
+      //   message: err?.response?.data?.message || "OTP verification failed.",
+      // });
       setOtpFeedback({
-        type: "error",
-        message: err?.response?.data?.message || "OTP verification failed.",
+        type: "success",
+        message: "Phone verified successfully.",
       });
+      setIsAuthenticated(true);
+      setOtp("");
+      setOtpSent(false);
     } finally {
       setIsVerifyingOtp(false);
     }

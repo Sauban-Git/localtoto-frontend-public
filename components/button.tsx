@@ -3,10 +3,21 @@ import { colors } from "@/constants/theme";
 import { useColors } from "@/hooks/useColors";
 import { Pressable, Text, StyleSheet } from "react-native";
 
-export default function MyButton({ title, onPress }: { title: string, onPress: () => void }) {
-  const c = useColors()
+type MyButtonProps = {
+  title: string;
+  onPress: () => void;
+  backgroundColor?: string; // optional background color prop
+  disabled?: boolean
+};
+
+export default function MyButton({ title, onPress, backgroundColor, disabled }: MyButtonProps) {
+  const c = useColors();
   return (
-    <Pressable style={styles.button} onPress={onPress}>
+    <Pressable
+      style={[styles.button, { backgroundColor: backgroundColor || "green" }]}
+      disabled={disabled}
+      onPress={onPress}
+    >
       <Text style={[styles.buttonText, { color: c.text }]}>{title}</Text>
     </Pressable>
   );
@@ -14,7 +25,6 @@ export default function MyButton({ title, onPress }: { title: string, onPress: (
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "green",
     padding: 12,
     marginHorizontal: 10,
     borderColor: "#ccc",
@@ -28,3 +38,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+

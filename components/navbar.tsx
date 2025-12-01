@@ -2,10 +2,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { usePathname, useRouter } from "expo-router";
+import { usePathname } from "expo-router";
 import { isAllowedAdmin } from "@/config/adminConfig";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Options } from "./options";
+import AnimatedBackground from "./animatedBackground";
 
 const NavBar = () => {
   const currentPath = usePathname();
@@ -36,6 +37,7 @@ const NavBar = () => {
 
 
   return (<>
+    <AnimatedBackground />
     <View style={[styles.navbar, isSolid && styles.navbarSolid]}>
 
       <Image source={require("@/assets/images/full_logo.png")} style={{ width: 100, height: 30, resizeMode: "contain" }} />
@@ -67,7 +69,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 12,
     zIndex: 50,
-    backgroundColor: "transparent",
   },
 
   navbarSolid: {

@@ -1,11 +1,12 @@
 
+import MyButton from '@/components/button';
 import Step1Personal from '@/components/screens/step1Personal';
 import Step3Documents from '@/components/screens/step2Documents';
 import Step2Vehicle from '@/components/screens/step2Vehicle';
 import StepIndicator from '@/components/stepIndicator';
 import useRiderOtpVerification from '@/hooks/useRiderOtpVerification';
 import api from '@/services/api';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Button, Text, ScrollView } from 'react-native';
 
 const BecomeRider = () => {
@@ -22,6 +23,15 @@ const BecomeRider = () => {
     panCard: null,
     aadhaarCard: null
   });
+
+  const [phoneVerified, setPhoneVerified] = useState(false);
+
+  // Call the hook once and monitor authentication state
+  const riderOtpHook = useRiderOtpVerification();
+
+  useEffect(() => {
+    setPhoneVerified(riderOtpHook.isAuthenticated);
+  }, [riderOtpHook.isAuthenticated]);
 
   const submit = async () => {
     const data = new FormData();
@@ -42,10 +52,9 @@ const BecomeRider = () => {
     await api.post('/riders/applications', data, {
       headers: { "Content-Type": "multipart/form-data" }
     });
+
     setStep(4);
   };
-
-  const phoneVerified = useRiderOtpVerification().isAuthenticated
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20 }}>
@@ -70,21 +79,23 @@ const BecomeRider = () => {
 
       {step < 4 && (
         <View style={{ marginTop: 20 }}>
-          {step > 1 && <Button title="Previous" onPress={() => setStep(step - 1)} />}
+          {step > 1 && <MyButton title="Previous" onPress={() => setStep(step - 1)} backgroundColor='#7DA7D9' />}
 
           {step < 3 && (
-            <Button
+            <MyButton
               title="Next"
               onPress={() => setStep(step + 1)}
               disabled={step === 1 && !phoneVerified}
+              backgroundColor='#8EC6A3'
             />
           )}
 
-          {step === 3 && <Button title="Submit Application" onPress={submit} />}
+          {step === 3 && <MyButton title="Submit Application" onPress={submit} backgroundColor='#63B28D' />}
         </View>
       )}
     </ScrollView>
   );
 }
 
-export default BecomeRider
+export default BecomeRider;
+
