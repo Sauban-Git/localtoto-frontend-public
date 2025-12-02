@@ -1,4 +1,5 @@
 
+import * as Notifications from 'expo-notifications';
 import * as Location from "expo-location"
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
@@ -13,8 +14,8 @@ import api from "@/services/api";
 import { useRideStore } from "@/stores/bookingConfirmStore";
 import { useBookingStateStore } from "@/stores/rideStore";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native"
+import { useEffect, useMemo, useState } from "react";
+import { Platform, StyleSheet, Text, View } from "react-native"
 
 type LocationState = Location.LocationObject | null;
 
@@ -75,6 +76,48 @@ const Waiting = () => {
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
+
+
+
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('ride-status', {
+        name: 'Ride Status',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      });
+    }
+  }, []);
+
+
+  const showRideNotification = async (title: string, body: string) => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sticky: true, // keeps it persistent on Android
+        sound: true,
+      },
+      trigger: null, // show immediately
+    });
+  };
+
+
+  useEffect(() => {
+    if (!expired && showBookingAnimation) {
+      const formattedTime = `${Math.floor(waitingTime / 60)
+        .toString()
+        .padStart(2, '0')}:${(waitingTime % 60).toString().padStart(2, '0')}`;
+
+      showRideNotification(
+        'Ride in Progress 🚗',
+        `Status: ${searchStatus}\nWaiting: ${formattedTime}`
+      );
+    }
+  }, [waitingTime, searchStatus, expired, showBookingAnimation]);
 
 
   useEffect(() => {
@@ -194,6 +237,7 @@ const Waiting = () => {
         // Keep showing the map (waiting room) and poll for driver assignment
         // We will navigate once a driver confirms the ride
       } else {
+        setShowBookingAnimation(true)
         console.log("backend gave error.. trying simulate now")
         alert(response.data?.message || 'Failed to book ride');
         simulateDriverAssignment()
@@ -255,19 +299,6 @@ const Waiting = () => {
       await handleBookRide();
     }
   };
-
-  // Memoize route data to avoid identity changes causing map layer flicker
-  const memoRouteData = useMemo(() => {
-    if (!rideData) return undefined;
-    const rd = rideData?.routeData;
-    return {
-      coordinates: rd.coordinates as any,
-      distance: rd.distance,
-      duration: rd.duration,
-      provider: rd.provider
-    };
-  }, [rideData?.routeData?.coordinates, rideData?.routeData?.distance, rideData?.routeData?.duration, rideData?.routeData?.provider]);
-
 
   // fetch drivers on regular interval
   useEffect(() => {

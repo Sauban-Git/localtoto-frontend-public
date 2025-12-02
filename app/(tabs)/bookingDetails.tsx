@@ -35,8 +35,8 @@ const BookingDetail = () => {
 
 
   const handleBooking = () => {
-
-    if (!phoneNumber) return
+    console.log(otpHook.phoneNumber)
+    if (!otpHook.phoneNumber) return
 
     const bookingData: BookingState = {
       pickupAddress: rideData?.pickupAddress,
@@ -46,7 +46,7 @@ const BookingDetail = () => {
       rideType: selectedRideType,
       firstName: 'User',
       lastName: '',
-      phoneNumber: phoneNumber,
+      phoneNumber: otpHook.phoneNumber,
       scheduledDate: scheduledDate,
       scheduledTime: scheduledTime,
       bookingForSelf: selectedRideType === 'private'
@@ -131,7 +131,7 @@ const BookingDetail = () => {
       </View>
 
       <View>
-        {!otpHook.isAuthenticated ? <PhoneVerificationCard /> : null}
+        {!otpHook.isAuthenticated ? <PhoneVerificationCard otpHook={otpHook} /> : null}
         <RideTypeSelector
           selectedRideType={selectedRideType}
           setSelectedRideType={setSelectedRideType}

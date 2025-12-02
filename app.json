@@ -13,6 +13,9 @@
       "bundleIdentifier": "com.anonymous.frontendpubliclocaltot"
     },
     "android": {
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ],
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyB0k38cWEOuM4jQyRl9dWR_rYgymaAMTfU"

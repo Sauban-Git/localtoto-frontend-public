@@ -121,7 +121,7 @@ export default function useRiderOtpVerification() {
       const res = await api.post("/riders/verify-otp", {
         phoneNumber,
         otp,
-        context: 'application'
+        context: "application"
       });
 
       if (res.data?.success) {
@@ -145,17 +145,10 @@ export default function useRiderOtpVerification() {
         });
       }
     } catch (err: any) {
-      // setOtpFeedback({
-      //   type: "error",
-      //   message: err?.response?.data?.message || "OTP verification failed.",
-      // });
       setOtpFeedback({
-        type: "success",
-        message: "Phone verified successfully.",
+        type: "error",
+        message: err?.response?.data?.message || "OTP verification failed.",
       });
-      setIsAuthenticated(true);
-      setOtp("");
-      setOtpSent(false);
     } finally {
       setIsVerifyingOtp(false);
     }

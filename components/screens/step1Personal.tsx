@@ -38,7 +38,6 @@ export default function Step1Personal({
         onChange={(t) => setForm({ ...form, address: t })}
       />
 
-      <OtpBox />
     </View>
   );
 }

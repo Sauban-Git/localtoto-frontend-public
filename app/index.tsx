@@ -1,14 +1,25 @@
 import MyButton from "@/components/button"
 import { useColors } from "@/hooks/useColors"
 import { useRouter } from "expo-router"
-import React from "react"
-import { StyleSheet, View } from "react-native"
+import React, { useEffect } from "react"
+import { StyleSheet, View, Platform } from "react-native"
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated'
+import * as Notifications from 'expo-notifications';
 
 const SplashScreen = () => {
   const c = useColors()
   const router = useRouter()
 
+
+  async function requestPermissions() {
+    if (Platform.OS === 'android') {
+      await Notifications.requestPermissionsAsync();
+    }
+  }
+
+  useEffect(() => {
+    requestPermissions();
+  }, []);
   return (
     <Animated.View style={[styles.container, { backgroundColor: c.primary }]}>
 

@@ -3,7 +3,11 @@ import React from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import useOtpVerification from "../hooks/useOtpVerification";
 
-export default function PhoneVerificationCard() {
+type PhoneVerificationCardProps = {
+  otpHook: ReturnType<typeof useOtpVerification>;
+};
+
+export default function PhoneVerificationCard({ otpHook }: PhoneVerificationCardProps) {
   const {
     phoneNumber,
     otp,
@@ -20,7 +24,7 @@ export default function PhoneVerificationCard() {
     setOtp,
     handleSendOtp,
     handleVerifyOtp,
-  } = useOtpVerification();
+  } = otpHook;
 
   if (isAuthenticated) return null;
 

@@ -1,5 +1,6 @@
 
 import MyButton from '@/components/button';
+import OtpBox from '@/components/otpBox';
 import Step1Personal from '@/components/screens/step1Personal';
 import Step3Documents from '@/components/screens/step2Documents';
 import Step2Vehicle from '@/components/screens/step2Vehicle';
@@ -61,10 +62,13 @@ const BecomeRider = () => {
       <StepIndicator step={step} />
 
       {step === 1 && (
-        <Step1Personal
-          form={form}
-          setForm={setForm}
-        />
+        <>
+          <Step1Personal
+            form={form}
+            setForm={setForm}
+          />
+          <OtpBox otpHook={riderOtpHook} />
+        </>
       )}
 
       {step === 2 && <Step2Vehicle form={form} setForm={setForm} />}

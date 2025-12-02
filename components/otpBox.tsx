@@ -3,7 +3,11 @@ import React from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import useRiderOtpVerification from "@/hooks/useRiderOtpVerification";
 
-const OtpBox = () => {
+type OtpBoxProps = {
+  otpHook: ReturnType<typeof useRiderOtpVerification>
+};
+
+const OtpBox = ({ otpHook }: OtpBoxProps) => {
   const {
     phoneNumber,
     otp,
@@ -20,7 +24,7 @@ const OtpBox = () => {
     setOtp,
     handleSendOtp,
     handleVerifyOtp,
-  } = useRiderOtpVerification();
+  } = otpHook;
 
   if (isAuthenticated) return null;
 
