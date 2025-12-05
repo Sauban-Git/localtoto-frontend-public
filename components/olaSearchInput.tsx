@@ -7,6 +7,7 @@ import { View, TextInput, TouchableOpacity, Text, ScrollView, ActivityIndicator 
 export default function OlaSearchInput({
   placeholder,
   onSelect,
+  externalSetLocation,
 }: {
   placeholder: string;
   onSelect: (location: {
@@ -14,6 +15,14 @@ export default function OlaSearchInput({
     lng: number;
     address: string;
   }) => void;
+
+  externalSetLocation?: {
+    lat: number;
+    lng: number;
+    address: string;
+  } | null;
+
+
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
@@ -22,6 +31,58 @@ export default function OlaSearchInput({
   const [isSelected, setIsSelected] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!externalSetLocation) return;
+
+    const { address } = externalSetLocation;
+
+    setQuery(address);        // update input field text
+    setIsSelected(false);     // allow search to run
+
+    const searchExternal = async () => {
+      setLoading(true);
+      setError(null);
+      setResults([]);
+
+      try {
+        const data = await olaMapsService.geocode(address);
+
+        if (!data?.success || data.results.length === 0) {
+          setError("Location not found");
+          return;
+        }
+
+        const match = data.results[0];
+
+        const withinService = isWithinServiceArea(match.lat, match.lng);
+        if (!withinService) {
+          setError("Service isn't available in this area");
+          return;
+        }
+
+        // auto-select because it is valid
+        onSelect({
+          lat: match.lat,
+          lng: match.lng,
+          address: match.display_name,
+        });
+
+        setQuery(match.display_name);
+        setIsSelected(true);
+        setResults([]);
+
+      } catch (err) {
+        console.error("External geocode failed:", err);
+        setError("Failed to fetch location.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    searchExternal();
+  }, [externalSetLocation]);
+
 
   useEffect(() => {
     if (isSelected) return;
@@ -67,6 +128,7 @@ export default function OlaSearchInput({
   const handleSelect = (item: GeocodeResult) => {
     setIsSelected(true)
     const withinService = isWithinServiceArea(item.lat, item.lng);
+    if (!withinService) return setError("Service isn't available in this area")
     onSelect({
       lat: item.lat,
       lng: item.lng,
@@ -80,8 +142,12 @@ export default function OlaSearchInput({
     <View style={{ width: "100%" }}>
       <TextInput
         value={query}
-        onChangeText={setQuery}
+        onChangeText={(text) => {
+          setQuery(text)
+          setIsSelected(false)
+        }}
         placeholder={placeholder}
+        placeholderTextColor="#999"
         style={{
           borderWidth: 1,
           borderColor: "#ccc",

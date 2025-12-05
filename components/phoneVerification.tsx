@@ -2,6 +2,7 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import useOtpVerification from "../hooks/useOtpVerification";
+import AnimatedBackground from "./animatedBackground";
 
 type PhoneVerificationCardProps = {
   otpHook: ReturnType<typeof useOtpVerification>;
@@ -29,7 +30,8 @@ export default function PhoneVerificationCard({ otpHook }: PhoneVerificationCard
   if (isAuthenticated) return null;
 
   return (
-    <View style={{ backgroundColor: "white", padding: 20, borderRadius: 16, elevation: 4 }}>
+    <View style={{ padding: 20 }}>
+      <AnimatedBackground />
       <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 12 }}>
         Verify Your Phone Number
       </Text>

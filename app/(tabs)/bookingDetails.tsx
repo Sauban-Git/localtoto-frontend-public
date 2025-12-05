@@ -76,6 +76,8 @@ const BookingDetail = () => {
       } catch {
         Alert.alert("Verify your phone first ...")
         router.replace('/(tabs)/home')
+      } finally {
+        setPageLoading(false)
       }
     };
 

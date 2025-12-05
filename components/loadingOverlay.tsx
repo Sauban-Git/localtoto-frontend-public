@@ -28,7 +28,7 @@ export default function LoadingOverlay({ message }: { message: string }) {
         <View style={styles.track}>
           <Animated.View style={[styles.fill, animatedBarStyle]}>
             <Image
-              source={require('./icons/rickshaw.png')}
+              source={require('@/assets/images/rickshaw.png')}
               style={styles.icon}
               resizeMode="contain"
             />

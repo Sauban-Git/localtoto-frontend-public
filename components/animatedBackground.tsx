@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     borderRadius: 300,
     opacity: 0.45,
     filter: "blur(30px)", // expo web uses this; mobile ignores safely
+    zIndex: -1,
   },
   greenBlob: {
     backgroundColor: "#c6f6d5",

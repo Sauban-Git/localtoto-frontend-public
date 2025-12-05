@@ -17,6 +17,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native"
 import LoadingOverlay from '@/components/loadingOverlay';
+import MyButton from '@/components/button';
 
 type LocationState = Location.LocationObject | null;
 
@@ -70,7 +71,7 @@ const Waiting = () => {
   const [scanProgress, setScanProgress] = useState<number>(0);
   const [bootLoading, setBootLoading] = useState<boolean>(true);
   const progress = useSharedValue<number>(0);
-  const [pageLoading, setPageLoading] = useState<boolean>(true);
+  const [pageLoading, setPageLoading] = useState<boolean>(false);
 
   //razorpay
   const [paymentPending, setPaymentPending] = useState<boolean>(false);
@@ -102,16 +103,33 @@ const Waiting = () => {
     }
   }, []);
 
-
+  // Send NEW status notification
   const showRideNotification = async (title: string, body: string) => {
     await Notifications.scheduleNotificationAsync({
+      identifier: "ride_waiting",
       content: {
         title,
         body,
-        sticky: true, // keeps it persistent on Android
         sound: true,
+        sticky: true,          // Android only
+        priority: Notifications.AndroidNotificationPriority.MAX,
       },
-      trigger: null, // show immediately
+      trigger: null,
+    });
+  };
+
+  // Update EXISTING notification cleanly
+  const updateRideNotification = async (title: string, body: string) => {
+    await Notifications.scheduleNotificationAsync({
+      identifier: "ride_waiting",  // SAME ID → replaces existing one
+      content: {
+        title,
+        body,
+        sound: false,
+        sticky: true,
+        priority: Notifications.AndroidNotificationPriority.MAX,
+      },
+      trigger: null,
     });
   };
 
@@ -121,8 +139,8 @@ const Waiting = () => {
         .toString()
         .padStart(2, '0')}:${(waitingTime % 60).toString().padStart(2, '0')}`;
 
-      showRideNotification(
-        'Ride in Progress 🚗',
+      updateRideNotification(
+        "Ride in Progress 🚗",
         `Status: ${searchStatus}\nWaiting: ${formattedTime}`
       );
     }
@@ -200,6 +218,7 @@ const Waiting = () => {
 
     try {
 
+      setPageLoading(true)
       const bookingData = {
         pickupLocation: { address: rideData.pickupAddress, coords: rideData.pickupCoords },
         dropoffLocation: { address: rideData.dropAddress, coords: rideData.dropCoords },
@@ -236,8 +255,9 @@ const Waiting = () => {
           } catch (_) {
             setPaymentPending(true);
             setPaymentModalOpen(true);
-            console.log("failed from backend... trying simulate option now..")
-            simulateDriverAssignment()
+          }
+          finally {
+            setPageLoading(false)
           }
         }
 
@@ -245,18 +265,13 @@ const Waiting = () => {
         // We will navigate once a driver confirms the ride
       } else {
         setShowBookingAnimation(true)
-        console.log("backend gave error.. trying simulate now")
         alert(response.data?.message || 'Failed to book ride');
-        simulateDriverAssignment()
       }
     } catch (error: any) {
-      console.log("erorrr: ", error)
       alert(error?.response?.data?.message || 'Failed to book ride');
       setShowBookingAnimation(false);
     } finally {
-
-
-      console.log("finallying booking driver..")
+      setPageLoading(false)
     }
   };
 
@@ -267,7 +282,7 @@ const Waiting = () => {
   }, [bookingId]);
 
   const cancelBooking = async () => {
-    if (bookingId) return;
+    if (!bookingId) return;
     try {
       await api.post(`/bookings/cancel/${bookingId}`);
     } catch (e: any) {
@@ -332,6 +347,14 @@ const Waiting = () => {
     return () => { cancelled = true; if (timer) window.clearInterval(timer); };
   }, [location]);
 
+  // dismiss notification on unmount
+  useEffect(() => {
+    return () => {
+      Notifications.dismissNotificationAsync("ride_waiting")
+        .catch(() => { });
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <AnimatedBackground />
@@ -376,6 +399,7 @@ const Waiting = () => {
           </Text>
         )}
       </View>
+      <MyButton onPress={cancelBooking} title='Cancel Booking' backgroundColor='red' />
 
 
     </View>
