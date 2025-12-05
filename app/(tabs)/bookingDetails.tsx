@@ -1,7 +1,7 @@
 
 import * as SecureStore from "expo-secure-store";
 import useOtpVerification from "@/hooks/useOtpVerification";
-import { StyleSheet, Text, View } from "react-native"
+import { Alert, StyleSheet, Text, View } from "react-native"
 import PhoneVerificationCard from "@/components/phoneVerification";
 import RideTypeSelector from "@/components/rideTypeSelector";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ import MyButton from "@/components/button";
 import { BookingState } from "@/types/type";
 import api from "@/services/api";
 import { useRouter } from "expo-router";
+import LoadingOverlay from "@/components/loadingOverlay";
 
 
 const BookingDetail = () => {
@@ -32,7 +33,7 @@ const BookingDetail = () => {
   const [scheduledTime, setScheduledTime] = useState("");
 
   const { fareSolo, fareShared } = useFareEstimator(rideData?.pickupCoords || null, rideData?.dropCoords || null)
-
+  const [pageLoading, setPageLoading] = useState<boolean>(false)
 
   const handleBooking = () => {
     console.log(otpHook.phoneNumber)
@@ -60,20 +61,20 @@ const BookingDetail = () => {
   // no need just rely on useOtpVerification hooks
   useEffect(() => {
     const checkAuth = async () => {
+      setPageLoading(true)
       try {
         const token = await SecureStore.getItemAsync('token');
         if (token) {
           const response = await api.get('/users/profile');
           if (response.data?.success) {
-            console.log('User profile data:', response.data.user);
             setPhoneNumber(response.data.user.phoneNumber || '');
+            setPageLoading(false)
           } else {
             router.replace('/(tabs)/home')
-
           }
         }
-      } catch (error) {
-        console.log('User not authenticated');
+      } catch {
+        Alert.alert("Verify your phone first ...")
         router.replace('/(tabs)/home')
       }
     };
@@ -81,13 +82,10 @@ const BookingDetail = () => {
     checkAuth();
   }, []);
 
-
-
-
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-
+      {pageLoading && <LoadingOverlay message='Preparing your ride details...' />}
       <View
         style={{
           padding: 20,

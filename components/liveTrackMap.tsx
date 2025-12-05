@@ -1,7 +1,8 @@
 
 import { View, StyleSheet } from "react-native";
 import { useRideStore } from "@/stores/bookingConfirmStore";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView from "react-native-ola-maps";
+import { Marker, Polyline } from "react-native-maps";
 
 const LiveTrackMap = () => {
   const data = useRideStore((state) => state.confirmationData);

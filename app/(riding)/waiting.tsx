@@ -16,10 +16,25 @@ import { useBookingStateStore } from "@/stores/rideStore";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native"
+import LoadingOverlay from '@/components/loadingOverlay';
 
 type LocationState = Location.LocationObject | null;
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  })
+})
+
 const Waiting = () => {
+
+  // Notifications
+  const [expoPushToken, setExpoPushToken] = useState('')
+  const [channels, setChannels] = useState<Notifications.NotificationChannel[]>([])
+  const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined)
 
   const razorpayKey = process.env?.EXPO_PUBLIC_RAZORPAY_KEY_ID as string | undefined;
   const progressAnim = useSharedValue(0);
@@ -55,9 +70,7 @@ const Waiting = () => {
   const [scanProgress, setScanProgress] = useState<number>(0);
   const [bootLoading, setBootLoading] = useState<boolean>(true);
   const progress = useSharedValue<number>(0);
-
-
-
+  const [pageLoading, setPageLoading] = useState<boolean>(true);
 
   //razorpay
   const [paymentPending, setPaymentPending] = useState<boolean>(false);
@@ -76,9 +89,6 @@ const Waiting = () => {
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
-
-
-
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -105,7 +115,6 @@ const Waiting = () => {
     });
   };
 
-
   useEffect(() => {
     if (!expired && showBookingAnimation) {
       const formattedTime = `${Math.floor(waitingTime / 60)
@@ -118,7 +127,6 @@ const Waiting = () => {
       );
     }
   }, [waitingTime, searchStatus, expired, showBookingAnimation]);
-
 
   useEffect(() => {
     if (razorpayKey) {
@@ -154,7 +162,6 @@ const Waiting = () => {
     const s = (sec % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
   };
-
 
   // Handle driver assignment (simulated)
   const simulateDriverAssignment = () => {
@@ -253,8 +260,6 @@ const Waiting = () => {
     }
   };
 
-
-
   useEffect(() => {
     if (!bookingId) {
       handleBookRide();
@@ -327,14 +332,10 @@ const Waiting = () => {
     return () => { cancelled = true; if (timer) window.clearInterval(timer); };
   }, [location]);
 
-
-
-
-
-
   return (
     <View style={styles.container}>
       <AnimatedBackground />
+      {pageLoading && <LoadingOverlay message='Preparing your ride details...' />}
       <View style={{ marginBottom: 40, alignItems: "center", backgroundColor: "white", borderRadius: 10, padding: 10 }}>
         <Text style={{ fontSize: 22, color: "#000000", fontWeight: "600" }}>
           {searchStatus}
@@ -390,8 +391,6 @@ const styles = StyleSheet.create({
     alignItems: "center"
   }
 })
-
-
 
 const PulsingDot = ({ active, expired }: { active: boolean; expired: boolean }) => {
   const pulse = useSharedValue(1);
