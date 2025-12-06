@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     inset: 0,
     zIndex: 120,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     height: 12,
     backgroundColor: 'rgba(229,229,229,0.9)',
     borderRadius: 999,
-    overflow: 'hidden',
+    overflow: 'visible',
     marginBottom: 12,
   },
   fill: {
