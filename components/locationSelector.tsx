@@ -30,6 +30,7 @@ export default function LocationSelector({
       <View style={{ position: "relative", width: "100%" }}>
         {/* Search Input */}
         <OlaSearchInput
+          onCurrentLocation={onCurrentLocation}
           placeholder={`Search ${label.toLowerCase()} or press location button`}
           onSelect={(data: any) => {
             onSelectLocation(
@@ -37,24 +38,8 @@ export default function LocationSelector({
               data.address
             );
           }}
-          externalSetLocation={externalLocation}
+          externalLocation={externalLocation}
         />
-
-        {/* Inline Button (inside the input) */}
-        <TouchableOpacity
-          onPress={onCurrentLocation}
-          style={{
-            position: "absolute",
-            right: 10,
-            top: "42%",
-            transform: [{ translateY: -12 }],
-            backgroundColor: "#16a34a",
-            padding: 6,
-            borderRadius: 5,
-          }}
-        >
-          <Ionicons name="locate" size={18} color="white" />
-        </TouchableOpacity>
 
       </View>
     </View >

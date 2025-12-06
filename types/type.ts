@@ -1,3 +1,4 @@
+import { MapCoordinates, RouteResponse } from "@/services/olaMapsService";
 
 export interface BookingState {
   rideId?: string;
@@ -12,9 +13,9 @@ export interface BookingState {
   rideType?: string;
   pickupAddress?: string;
   dropAddress?: string;
-  pickupCoords?: { lat: number; lng: number };
-  dropCoords?: { lat: number; lng: number };
-  routeData?: any
+  pickupCoords?: MapCoordinates;
+  dropCoords?: MapCoordinates;
+  routeData?: RouteResponse | null
   phoneNumber?: string
   bookingForSelf?: boolean
 }

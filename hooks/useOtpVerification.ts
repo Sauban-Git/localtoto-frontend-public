@@ -126,7 +126,6 @@ export default function useOtpVerification() {
       });
 
       if (res.data?.success) {
-        console.log(res.data)
         setIsAuthenticated(true);
         setOtp("");
         setOtpSent(false);

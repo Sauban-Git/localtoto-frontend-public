@@ -7,14 +7,13 @@ import RideTypeSelector from "@/components/rideTypeSelector";
 import { useEffect, useState } from "react";
 import { useRideStore } from "@/stores/bookingConfirmStore";
 import useFareEstimator from "@/hooks/useFareEstimator";
-import olaMapsService, { MapCoordinates } from "@/services/olaMapsService";
+import olaMapsService from "@/services/olaMapsService";
 import AnimatedBackground from "@/components/animatedBackground";
 import MyButton from "@/components/button";
 import { BookingState } from "@/types/type";
 import api from "@/services/api";
 import { useRouter } from "expo-router";
 import LoadingOverlay from "@/components/loadingOverlay";
-
 
 const BookingDetail = () => {
 
@@ -29,15 +28,23 @@ const BookingDetail = () => {
 
   const rideData = useRideStore((state) => state.confirmationData)
   const setRideData = useRideStore((state) => state.setConfirmationData);
+
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
 
-  const { fareSolo, fareShared } = useFareEstimator(rideData?.pickupCoords || null, rideData?.dropCoords || null)
-  const [pageLoading, setPageLoading] = useState<boolean>(false)
+  const { fareSolo, fareShared } = useFareEstimator(
+    rideData?.pickupCoords || null,
+    rideData?.dropCoords || null
+  );
 
-  const handleBooking = () => {
-    console.log(otpHook.phoneNumber)
-    if (!otpHook.phoneNumber) return
+  const [pageLoading, setPageLoading] = useState<boolean>(false)
+  const [processing, setProcessing] = useState(false)
+
+
+  const handleBooking = async () => {
+    setProcessing(true)
+
+    if (!otpHook.phoneNumber) return setProcessing(false)
 
     const bookingData: BookingState = {
       pickupAddress: rideData?.pickupAddress,
@@ -55,10 +62,12 @@ const BookingDetail = () => {
 
     setRideData(bookingData)
 
+    setProcessing(false)
     router.push('/(riding)/waiting')
   }
 
-  // no need just rely on useOtpVerification hooks
+
+  // Check stored token
   useEffect(() => {
     const checkAuth = async () => {
       setPageLoading(true)
@@ -68,7 +77,6 @@ const BookingDetail = () => {
           const response = await api.get('/users/profile');
           if (response.data?.success) {
             setPhoneNumber(response.data.user.phoneNumber || '');
-            setPageLoading(false)
           } else {
             router.replace('/(tabs)/home')
           }
@@ -84,54 +92,45 @@ const BookingDetail = () => {
     checkAuth();
   }, []);
 
+
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      {pageLoading && <LoadingOverlay message='Preparing your ride details...' />}
-      <View
-        style={{
-          padding: 20,
-          borderRadius: 12,
-          marginBottom: 30,
-        }}
-      >
-        <Text style={{ color: "#555", fontSize: 12 }}>PICKUP</Text>
-        <Text style={{ color: "#000", fontSize: 16, marginBottom: 10 }}>
-          {rideData?.pickupAddress}
-        </Text>
 
-        <Text style={{ color: "#555", fontSize: 12 }}>DROP</Text>
-        <Text style={{ color: "#000", fontSize: 16 }}>
-          {rideData?.dropAddress}
-        </Text>
+      {pageLoading && <LoadingOverlay message="Preparing your ride details..." />}
+
+      {/* Route Info Card */}
+      <View style={styles.card}>
+        <Text style={styles.label}>PICKUP</Text>
+        <Text style={styles.value}>{rideData?.pickupAddress}</Text>
+
+        <Text style={[styles.label, { marginTop: 12 }]}>DROP</Text>
+        <Text style={styles.value}>{rideData?.dropAddress}</Text>
       </View>
 
-      <View
-        style={{
-          padding: 15,
-          borderRadius: 12,
-          marginBottom: 20,
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
+      {/* Distance and Durantion */}
+      <View style={[styles.card, styles.rowBetween]}>
         <View>
-          <Text style={{ color: "#555", fontSize: 12 }}>DISTANCE{" "}</Text>
-          <Text style={{ color: "#000", fontSize: 16 }}>
-            {olaMapsService.formatDistance(rideData?.routeData?.distance) || "—"}
+          <Text style={styles.label}>DISTANCE</Text>
+          <Text style={styles.value}>
+            {olaMapsService.formatDistance(rideData?.routeData?.distance || 0) || "—"}
           </Text>
         </View>
 
         <View>
-          <Text style={{ color: "#555", fontSize: 12 }}>DURATION{" "}</Text>
-          <Text style={{ color: "#000", fontSize: 16 }}>
-            {olaMapsService.formatDuration(rideData?.routeData?.duration) || "—"}
+          <Text style={styles.label}>DURATION</Text>
+          <Text style={styles.value}>
+            {olaMapsService.formatDuration(rideData?.routeData?.duration || 0) || "—"}
           </Text>
         </View>
       </View>
 
-      <View>
-        {!otpHook.isAuthenticated ? <PhoneVerificationCard otpHook={otpHook} /> : null}
+      {/* Verification + Ride Type */}
+      <View style={{ marginBottom: 20 }}>
+        {!otpHook.isAuthenticated && (
+          <PhoneVerificationCard otpHook={otpHook} />
+        )}
+
         <RideTypeSelector
           selectedRideType={selectedRideType}
           setSelectedRideType={setSelectedRideType}
@@ -142,21 +141,50 @@ const BookingDetail = () => {
           setScheduledDate={setScheduledDate}
           setScheduledTime={setScheduledTime}
         />
+      </View>
 
-      </View>
-      <View>
-        <MyButton title="Book Ride" onPress={handleBooking} />
-      </View>
+      {/* Button */}
+      <MyButton
+        title="Book Ride"
+        onPress={handleBooking}
+        disabled={processing}
+      />
     </View>
-  )
-}
+  );
+};
 
-export default BookingDetail
+export default BookingDetail;
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10
+    padding: 16,
+    justifyContent: "flex-start",
+  },
+
+  card: {
+    backgroundColor: "rgba(255,255,255,0.9)",
+    padding: 18,
+    borderRadius: 14,
+    marginBottom: 18,
+  },
+
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  label: {
+    color: "#555",
+    fontSize: 12,
+    marginBottom: 4,
+  },
+
+  value: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "500",
   }
-})
+});
 

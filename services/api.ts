@@ -26,8 +26,6 @@ const api = axios.create({
   timeout: 120000,
 });
 
-console.log("[API] baseURL =", api.defaults.baseURL);
-
 api.interceptors.request.use(async (config) => {
   try {
     const publicEndpoints = [

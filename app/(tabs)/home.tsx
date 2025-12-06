@@ -10,6 +10,7 @@ import { BookingState } from "@/types/type";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native"
+import Toast from "react-native-toast-message"
 
 type LocationState = Location.LocationObject | null;
 
@@ -18,6 +19,7 @@ const Home = () => {
   const [pickupAddress, setPickupAddress] = useState<string>("");
   const [dropCoords, setDrop] = useState<MapCoordinates | null>(null);
   const [dropAddress, setDropAddress] = useState<string>("")
+  const [processing, setProcessing] = useState(false)
   const router = useRouter()
 
   const [location, setLocation] = useState<LocationState>(null)
@@ -26,10 +28,15 @@ const Home = () => {
 
   const setRideData = useRideStore((state) => state.setConfirmationData)
   const handleBooking = async () => {
-
-
+    setProcessing(true)
     if (!pickupCoords || !dropCoords) {
-      alert("Please select pickup and drop locations!");
+      Toast.show({
+        type: "error",
+        text1: "Missing Info",
+        text2: "Please select a pickup and dropoff point!",
+        position: "bottom",
+      });
+      setProcessing(false)
       return;
     }
     const routeData = await olaMapsService.getRoute(pickupCoords, dropCoords)
@@ -39,10 +46,11 @@ const Home = () => {
       dropCoords,
       pickupAddress,
       dropAddress,
-      routeData,
+      routeData: routeData,
     }
 
     setRideData(bookingConfirmationData)
+    setProcessing(false)
 
     router.push('/(tabs)/bookingDetails')
 
@@ -53,12 +61,11 @@ const Home = () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync()
         if (status !== 'granted') {
-          console.log("Permission denied..")
+          alert("Permission Denied")
           return
         }
         const servicesEnabled = await Location.hasServicesEnabledAsync();
         if (!servicesEnabled) {
-          console.log("Location services are OFF");
           alert("Please enable your device's GPS / Location Services.");
           IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.LOCATION_SOURCE_SETTINGS);
           return;
@@ -66,7 +73,6 @@ const Home = () => {
         const location = await Location.getCurrentPositionAsync({})
         setLocation(location)
       } catch (error) {
-        console.log("Error while getting location ", error)
       }
     }
     getLocation()
@@ -94,13 +100,13 @@ const Home = () => {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: "green" }}>
+    <View style={{ flex: 1 }}>
       {/* Background stays fixed */}
       <AnimatedBackground />
 
 
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{ flex: 1, backgroundColor: "green" }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 120}   // ← move UP more
       >
@@ -110,7 +116,7 @@ const Home = () => {
         >
           <View style={{ paddingVertical: 130 }}>
             <Text style={styles.titleAtt}>
-              Book an <Text style={{ color: "yellow" }}>e-Rickshaw</Text>
+              Book an <Text style={{ color: "yellow", fontWeight: "900" }}>e-Rickshaw</Text>
             </Text>
             <Text style={styles.titleAtt}>in Your City</Text>
           </View>
@@ -139,7 +145,7 @@ const Home = () => {
             onCurrentLocation={useCurrentLocationForDropOff}
           />
 
-          <MyButton title="Book" onPress={handleBooking} />
+          <MyButton title="Book" disabled={processing} backgroundColor="white" onPress={handleBooking} />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -152,7 +158,6 @@ export default Home
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "green",
     paddingHorizontal: 5
   },
   titleAtt: {
@@ -161,6 +166,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     textAlign: "left",
     paddingHorizontal: 5,
+    fontWeight: "900",
   }
 });
 

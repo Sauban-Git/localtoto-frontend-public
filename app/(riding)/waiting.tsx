@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native"
 import LoadingOverlay from '@/components/loadingOverlay';
 import MyButton from '@/components/button';
+import LiveTrackMap from '@/components/liveTrackMap';
 
 type LocationState = Location.LocationObject | null;
 
@@ -54,6 +55,7 @@ const Waiting = () => {
   const [location, setLocation] = useState<LocationState>(null)
 
   const rideData = useRideStore((state) => state.confirmationData)
+  const [processing, setProcessing] = useState(false)
 
   // Booking states
   const [isBookingRide, setIsBookingRide] = useState<boolean>(false);
@@ -198,14 +200,10 @@ const Waiting = () => {
 
     setDriverAssigned(true);
     setDriverInfo(mockDriver);
-
-    // Navigate to booking confirmation page
-    console.log("yeeeeeeeeeeeeee rider founddd")
   };
 
   const handleBookRide = async () => {
     if (!rideData || !rideData.phoneNumber) {
-      console.log("First verifying phone")
       router.replace('/(tabs)/bookingDetails')
       return;
     }
@@ -232,21 +230,16 @@ const Waiting = () => {
         bookingForSelf: rideData.rideType === 'private'
       };
 
-      console.log("data: ", bookingData)
-
       const response = await api.post('/bookings/book', bookingData);
 
       if (response.data?.success) {
-        console.log(response.data)
         const rideId = response.data.rideId;
-        console.log("RideId: ", rideId)
         setBookingId(rideId);
         // If online, immediately create order and open payment modal
         if (paymentMethod === 'online') {
           try {
             const orderRes = await api.post('/payments/create-order', { bookingId: rideId, amount: amountDue });
             if (orderRes.data?.success) {
-              console.log("payment succeded: ", orderRes.data)
               setPaymentPending(true);
               setPaymentOrderId(orderRes.data.orderId);
               setPaymentId(orderRes.data.paymentId);
@@ -282,12 +275,14 @@ const Waiting = () => {
   }, [bookingId]);
 
   const cancelBooking = async () => {
-    if (!bookingId) return;
+    setProcessing(true)
+    if (!bookingId) return setProcessing(false);
     try {
       await api.post(`/bookings/cancel/${bookingId}`);
     } catch (e: any) {
       alert(e?.response?.data?.message || 'Failed to cancel ride');
     } finally {
+      setProcessing(false)
     }
     router.replace('/(tabs)/home')
   };
@@ -332,8 +327,6 @@ const Waiting = () => {
           params.lat = location.coords.latitude; params.lng = location.coords.longitude;
         }
         const res = await api.get('/riders/online-drivers', { params });
-
-        console.log("riders..Searching: ", res.data)
         const backendCount = typeof res.data?.count === 'number' ? res.data.count : 0;
         const drivers = Array.isArray(res.data?.drivers) ? res.data.drivers : [];
         if (!cancelled) { setOnlineDrivers(drivers); setOnlineCount(backendCount); }
@@ -399,7 +392,10 @@ const Waiting = () => {
           </Text>
         )}
       </View>
-      <MyButton onPress={cancelBooking} title='Cancel Booking' backgroundColor='red' />
+
+      <LiveTrackMap isFullScreen={false} />
+
+      <MyButton disabled={processing} onPress={cancelBooking} title='Cancel Booking' backgroundColor='red' />
 
 
     </View>
