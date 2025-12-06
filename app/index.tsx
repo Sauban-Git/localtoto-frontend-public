@@ -5,7 +5,6 @@ import React, { useEffect } from "react"
 import { StyleSheet, View, Platform } from "react-native"
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated'
 import * as Notifications from 'expo-notifications';
-import LoadingOverlay from "@/components/loadingOverlay"
 
 const SplashScreen = () => {
   const c = useColors()
@@ -18,33 +17,25 @@ const SplashScreen = () => {
     }
   }
 
-  // useEffect(() => {
-  //   requestPermissions();
-  //   const timer = setTimeout(() => {
-  //     router.replace('/(tabs)/home')
-  //   }, 1000); // 1 second
-  //
-  //   return () => clearTimeout(timer); // cleanup
-  // }, []);
+  useEffect(() => {
+    requestPermissions();
+    const timer = setTimeout(() => {
+      router.replace('/(tabs)/home')
+    }, 1000); // 1 second
 
-  return (<>
-    {/* <Animated.View style={[styles.container, { backgroundColor: c.primary }]}> */}
-    {/**/}
-    {/*   <View> */}
-    {/*   </View> */}
-    {/**/}
-    {/**/}
-    {/*   <Animated.Image entering={FadeIn.duration(700)} style={{ resizeMode: "contain", width: 200, height: 200, alignItems: "center" }} source={require("@/assets/images/rickshaw.png")} /> */}
-    {/*   <Animated.Text entering={FadeIn.duration(700)} style={[styles.title, { color: c.highlight }]}>Auto Booking{" "}</Animated.Text> */}
-    {/*   <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text1, { color: c.highlight }]}>First e-Vehicle Mobility app</Animated.Text> */}
-    {/**/}
-    {/*   <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text2, { color: c.highlight }]}>App by the drivers for the people</Animated.Text> */}
-    {/*   <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text, { color: c.highlight }]}>Safety is our first priority</Animated.Text> */}
-    {/*   <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text, { color: c.highlight }]}>Eco friendly</Animated.Text> */}
-    {/*   <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text, { color: c.highlight }]}>Book an electric auto with Zero Commision</Animated.Text> */}
-    {/* </Animated.View> */}
-    <LoadingOverlay message="Testing" />
-  </>
+    return () => clearTimeout(timer); // cleanup
+  }, []);
+
+  return (
+    <Animated.View style={[styles.container, { backgroundColor: c.primary }]}>
+      <Animated.Image entering={FadeIn.duration(700)} style={{ resizeMode: "contain", width: 200, height: 200, alignItems: "center" }} source={require("@/assets/images/rickshaw.png")} />
+      <Animated.Text entering={FadeIn.duration(700)} style={[styles.title, { color: c.highlight }]}>Auto Booking{" "}</Animated.Text>
+      <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text1, { color: c.highlight }]}>First e-Vehicle Mobility app</Animated.Text>
+      <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text2, { color: c.highlight }]}>App by the drivers for the people</Animated.Text>
+      <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text, { color: c.highlight }]}>Safety is our first priority</Animated.Text>
+      <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text, { color: c.highlight }]}>Eco friendly</Animated.Text>
+      <Animated.Text entering={FadeInDown.duration(700).springify()} style={[styles.text, { color: c.highlight }]}>Book an electric auto with Zero Commision</Animated.Text>
+    </Animated.View>
   )
 }
 
