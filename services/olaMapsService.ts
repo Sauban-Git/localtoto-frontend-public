@@ -1,3 +1,4 @@
+import Toast from "react-native-toast-message";
 
 // Ola Maps Service for frontend
 export interface MapCoordinates {
@@ -78,14 +79,18 @@ class OlaMapsService {
       const data = await response.json();
       return data.success ? data : null;
     } catch (error) {
-      console.log('Error fetching route:', error);
+      Toast.show({
+        type: "error",
+        text1: "Network Error!",
+        text2: "Network error while connecting server!"
+      })
       return null;
     }
   }
 
   async geocode(query: string): Promise<GeocodingResponse | null> {
     try {
-      console.log("basurlolamap: ", this.baseUrl)
+
       const response = await fetch(`${this.baseUrl}/geocode?q=${encodeURIComponent(query)}`);
 
       if (!response.ok) {
@@ -95,7 +100,13 @@ class OlaMapsService {
       const data = await response.json();
       return data.success ? data : null;
     } catch (error) {
-      console.log('Error geocoding:', error);
+      Toast.show({
+        type: "error",
+        text1: "Network Error!",
+        text2: "Network error while connecting server!",
+        position: "bottom",
+        visibilityTime: 1000,
+      })
       return null;
     }
   }
@@ -111,7 +122,11 @@ class OlaMapsService {
       const data = await response.json();
       return data.success ? data : null;
     } catch (error) {
-      console.log('Error reverse geocoding:', error);
+      Toast.show({
+        type: "error",
+        text1: "Network Error!",
+        text2: "Network error while connecting server!"
+      })
       return null;
     }
   }

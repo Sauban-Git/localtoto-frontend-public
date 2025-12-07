@@ -19,6 +19,7 @@ import { Platform, StyleSheet, Text, View } from "react-native"
 import LoadingOverlay from '@/components/loadingOverlay';
 import MyButton from '@/components/button';
 import LiveTrackMap from '@/components/liveTrackMap';
+import Toast from 'react-native-toast-message';
 
 type LocationState = Location.LocationObject | null;
 
@@ -280,7 +281,13 @@ const Waiting = () => {
     try {
       await api.post(`/bookings/cancel/${bookingId}`);
     } catch (e: any) {
-      alert(e?.response?.data?.message || 'Failed to cancel ride');
+      Toast.show({
+        type: "error",
+        text1: "Booking already cancelled",
+        text2: e?.response?.data?.message || 'Failed to cancel ride',
+        position: "bottom",
+        visibilityTime: 2000
+      })
     } finally {
       setProcessing(false)
     }
@@ -357,7 +364,8 @@ const Waiting = () => {
           {searchStatus}
         </Text>
 
-        <Text> Waiting <Text> {formatTime(waitingTime)}</Text> </Text>
+        {!expired ? <Text> Waiting <Text> {formatTime(waitingTime)}</Text> </Text> : <Text>No Drivers Found</Text>}
+        {expired && <MyButton title='Simulate fake driver' onPress={simulateDriverAssignment} backgroundColor='#3498db' />}
         <View style={{ flexDirection: "row", marginTop: 12 }}>
           <PulsingDot active={!expired} expired={expired} />
           <PulsingDot active={false} expired={expired} />
@@ -385,7 +393,6 @@ const Waiting = () => {
           />
         </View>
 
-
         {!expired && (
           <Text style={{ marginTop: 6, color: "#000000" }}>
             We’re connecting you with the nearest driver
@@ -395,7 +402,11 @@ const Waiting = () => {
 
       <LiveTrackMap isFullScreen={false} />
 
-      <MyButton disabled={processing} onPress={cancelBooking} title='Cancel Booking' backgroundColor='red' />
+      {!expired ?
+        <MyButton disabled={processing} onPress={cancelBooking} title='Cancel Booking' backgroundColor='red' />
+        :
+        <MyButton onPress={retrySearch} title='Try again' backgroundColor='#3498db' />
+      }
 
 
     </View>

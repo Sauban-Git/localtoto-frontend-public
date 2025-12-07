@@ -8,3 +8,5 @@ const AdminHome = () => {
     </View>
   )
 }
+
+export default AdminHome

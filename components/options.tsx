@@ -42,7 +42,7 @@ export const Options: React.FC<OptionsProps> = ({ isOpen, onClose }) => {
         <TouchableOpacity style={styles.option} onPress={() => { }}>
           <Text style={styles.optionText}>Careers</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option} onPress={() => { }}>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/contactuspage' }}>
           <Text style={styles.optionText}>Contact Us</Text>
         </TouchableOpacity>
       </View>

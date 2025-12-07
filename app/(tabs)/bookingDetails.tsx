@@ -44,8 +44,9 @@ const BookingDetail = () => {
   const handleBooking = async () => {
     setProcessing(true)
 
-    if (!otpHook.phoneNumber) return setProcessing(false)
+    if (!otpHook.phoneNumber || !rideData) return setProcessing(false)
 
+    const routeData = await olaMapsService.getRoute(rideData?.pickupCoords || null, rideData?.dropCoords || null)
     const bookingData: BookingState = {
       pickupAddress: rideData?.pickupAddress,
       pickupCoords: rideData?.pickupCoords,
@@ -57,7 +58,8 @@ const BookingDetail = () => {
       phoneNumber: otpHook.phoneNumber,
       scheduledDate: scheduledDate,
       scheduledTime: scheduledTime,
-      bookingForSelf: selectedRideType === 'private'
+      bookingForSelf: selectedRideType === 'private',
+      routeData: routeData
     };
 
     setRideData(bookingData)
