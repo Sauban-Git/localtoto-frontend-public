@@ -10,7 +10,7 @@ const ContactUsPage = () => {
     name: '',
     email: '',
     phone: '',
-    subject: '',
+    subject: 'Select a subject',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,7 +42,7 @@ const ContactUsPage = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Contact Us</Text>
       <Text style={styles.subheading}>
-        We&#39d love to hear from you. Send us a message and we&#39dll respond as soon as possible.
+        We{`'`}d love to hear from you. Send us a message and we{`'`}ll respond as soon as possible.
       </Text>
 
       <View style={styles.infoContainer}>
@@ -67,11 +67,13 @@ const ContactUsPage = () => {
         <TextInput
           style={styles.input}
           placeholder="Full Name"
+          placeholderTextColor="gray"
           value={formData.name}
           onChangeText={text => handleChange('name', text)}
         />
         <TextInput
           style={styles.input}
+          placeholderTextColor="gray"
           placeholder="Email"
           keyboardType="email-address"
           value={formData.email}
@@ -79,24 +81,35 @@ const ContactUsPage = () => {
         />
         <TextInput
           style={styles.input}
+          placeholderTextColor="gray"
           placeholder="Phone Number"
           keyboardType="phone-pad"
           value={formData.phone}
           onChangeText={text => handleChange('phone', text)}
         />
-        <Picker
-          selectedValue={formData.subject}
-          onValueChange={value => handleChange('subject', value)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Select a subject" value="" />
-          <Picker.Item label="General Inquiry" value="general" />
-          <Picker.Item label="Customer Support" value="support" />
-          <Picker.Item label="Booking Issue" value="booking" />
-          <Picker.Item label="Feedback" value="feedback" />
-          <Picker.Item label="Partnership" value="partnership" />
-          <Picker.Item label="Other" value="other" />
-        </Picker>
+
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={formData.subject}
+            onValueChange={value => handleChange('subject', value)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Select a subject" value="" />
+            <Picker.Item label="General Inquiry" value="general" />
+            <Picker.Item label="Customer Support" value="support" />
+            <Picker.Item label="Booking Issue" value="booking" />
+            <Picker.Item label="Feedback" value="feedback" />
+            <Picker.Item label="Partnership" value="partnership" />
+            <Picker.Item label="Other" value="other" />
+          </Picker>
+          <Feather
+            name="chevron-down"
+            size={20}
+            color="#4b5563"
+            style={styles.pickerIcon}
+          />
+        </View>
+
         <TextInput
           style={[styles.input, { height: 120 }]}
           placeholder="Message"
@@ -124,14 +137,32 @@ const styles = StyleSheet.create({
   container: { padding: 20, backgroundColor: '#f9fafb' },
   heading: { fontSize: 32, fontWeight: 'bold', color: '#111827', marginBottom: 10, textAlign: 'center' },
   subheading: { fontSize: 16, color: '#4b5563', marginBottom: 20, textAlign: 'center' },
-  infoContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
+  infoContainer: { flexDirection: 'column', gap: 12, marginBottom: 20 },
   infoBox: { flex: 1, backgroundColor: '#fff', padding: 16, borderRadius: 12, alignItems: 'center', marginHorizontal: 4, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
   iconWrapper: { backgroundColor: '#d1fae5', borderRadius: 32, padding: 12, marginBottom: 8 },
   infoTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4, color: '#111827' },
   infoText: { fontSize: 14, color: '#4b5563', textAlign: 'center' },
   formContainer: { backgroundColor: '#fff', padding: 16, borderRadius: 12, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
   input: { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 16, backgroundColor: '#fff' },
-  picker: { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, marginBottom: 12 },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    marginBottom: 12,
+    backgroundColor: '#fff',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    color: '#111827', // text color
+  },
+  pickerIcon: {
+    position: 'absolute',
+    right: 12,
+    top: '50%',
+    marginTop: -10,
+    pointerEvents: 'none',
+  },
   button: { backgroundColor: '#16a34a', padding: 14, borderRadius: 8, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' },
   buttonContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   buttonText: { color: '#fff', fontWeight: '600', fontSize: 16, marginLeft: 8 }
