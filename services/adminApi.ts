@@ -1,97 +1,164 @@
 
-import axios from 'axios';
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 
-const defaultBase = (() => {
-  // In dev, use Vite proxy via relative '/api'
-  // try {
-  //   if ((import.meta as any).env?.DEV) {
-  //     return '/api';
-  //   }
-  // } catch { }
-  // Otherwise use explicit env or fallback to 5001
-  try {
-    const envBase = (import.meta as any).env?.VITE_API_BASE_URL;
-    if (envBase) return envBase;
-  } catch { }
-  try {
-    const host = typeof window !== 'undefined' && window.location ? window.location.hostname : 'localhost';
-    return `http://${host}:5000/api`;
-  } catch {
-    return 'http://localhost:5000/api';
-  }
-})();
+/* ---------- Secure Storage Wrapper (RN) ---------- */
+const storage = {
+  get: async (key: string) => await SecureStore.getItemAsync(key),
+  set: async (key: string, value: string) =>
+    await SecureStore.setItemAsync(key, value),
+  remove: async (key: string) => await SecureStore.deleteItemAsync(key),
+};
 
+/* ---------- Base URL ---------- */
+const baseURL = __DEV__
+  ? `${process.env?.EXPO_PUBLIC_API_BASE_URL}/api`
+  : process.env?.EXPO_PUBLIC_API_BASE_URL;
+
+if (!baseURL) {
+  console.warn("[AdminAPI] EXPO_PUBLIC_API_BASE_URL is not defined!");
+}
+/* ---------- Admin API Instance ---------- */
 const adminApi = axios.create({
-  baseURL: (import.meta as any).env?.VITE_API_BASE_URL || defaultBase,
-  headers: { 'Content-Type': 'application/json' }
+  baseURL,
+  withCredentials: false,
+  timeout: 120000,
 });
 
-// Debug: log resolved API base URL once on init
-try {
-  const resolvedBase = (adminApi.defaults && adminApi.defaults.baseURL) || 'unknown';
+/* ---------- Request Interceptor (same as mobile) ---------- */
+adminApi.interceptors.request.use(async (config) => {
+  try {
+    const token = await storage.get("adminAccess");
+    const alreadyAuth =
+      config.headers && (config.headers as any).Authorization;
 
-  console.log('[AdminAPI] baseURL =', resolvedBase);
-} catch { }
+    if (token && !alreadyAuth) {
+      config.headers = config.headers || {};
+      (config.headers as any).Authorization = `Bearer ${token}`;
+    }
 
-adminApi.interceptors.request.use((config) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminAccess') : null;
-  if (token) {
-    config.headers = config.headers || {};
-    (config.headers as any).Authorization = `Bearer ${token}`;
-    // Debug: log token presence
-    console.log('[AdminAPI] Request with token:', config.url, token ? 'YES' : 'NO');
-  } else {
-    console.warn('[AdminAPI] No admin token found for request:', config.url);
-  }
+    const isFormData =
+      typeof FormData !== "undefined" && config.data instanceof FormData;
+
+    if (isFormData) {
+      if (config.headers && "Content-Type" in config.headers) {
+        delete (config.headers as any)["Content-Type"];
+      }
+    } else {
+      (config.headers as any)["Content-Type"] =
+        (config.headers as any)["Content-Type"] || "application/json";
+    }
+  } catch { }
+
   return config;
 });
 
-// Debug: log response errors for easier troubleshooting
+/* ---------- Refresh Logic (identical to mobile API) ---------- */
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+let lastRefreshAttempt = 0;
+const REFRESH_COOLDOWN_MS = 5000;
+
+/* ---------- Response Interceptor ---------- */
 adminApi.interceptors.response.use(
-  (response) => {
-    // Log successful responses for debugging
-    console.log('[AdminAPI] ✅ Response:', {
-      url: response.config?.url,
-      status: response.status,
-      data: response.data
-    });
-    return response;
-  },
+  (response) => response,
+
   async (error) => {
     try {
       const cfg = error?.config || {};
-      if (error?.response?.status === 401 && !(cfg as any)._retryAdmin) {
-        (cfg as any)._retryAdmin = true;
-        try {
-          const refresh = typeof window !== 'undefined' ? localStorage.getItem('adminRefresh') : null;
-          if (!refresh) throw new Error('No refresh');
-          const res = await axios.post(`${adminApi.defaults.baseURL}/admin/refresh`, { refresh });
-          const access = res.data?.access;
-          const newRefresh = res.data?.refresh || refresh;
-          if (!access) throw new Error('No access');
-          localStorage.setItem('adminAccess', access);
-          localStorage.setItem('adminRefresh', newRefresh);
-          cfg.headers = cfg.headers || {};
-          (cfg.headers as any).Authorization = `Bearer ${access}`;
-          return adminApi.request(cfg);
-        } catch (e) {
-          try {
-            localStorage.removeItem('adminAccess');
-            localStorage.removeItem('adminRefresh');
-          } catch { }
-          if (typeof window !== 'undefined') window.location.href = '/admin/login';
-          return Promise.reject(e);
-        }
+      const url = cfg?.url || "";
+
+      const isRefreshEndpoint = url.includes("/admin/refresh");
+
+      if (isRefreshEndpoint) {
+        await storage.remove("adminAccess");
+        await storage.remove("adminRefresh");
+        isRefreshing = false;
+        refreshPromise = null;
+        return Promise.reject(error);
       }
 
-      console.error('[AdminAPI] Error', {
-        url: cfg?.url,
-        method: cfg?.method,
-        status: error?.response?.status,
-        data: error?.response?.data,
-        message: error?.message
-      });
+      // 401 handling with cooldown — same as mobile API
+      if (
+        error?.response?.status === 401 &&
+        !(cfg as any)._retryAdmin &&
+        !isRefreshing
+      ) {
+        const now = Date.now();
+
+        if (now - lastRefreshAttempt < REFRESH_COOLDOWN_MS) {
+          await storage.remove("adminAccess");
+          await storage.remove("adminRefresh");
+          return Promise.reject(error);
+        }
+
+        (cfg as any)._retryAdmin = true;
+        lastRefreshAttempt = now;
+
+        // Already refreshing? Wait
+        if (refreshPromise) {
+          try {
+            const newToken = await refreshPromise;
+            if (newToken) {
+              cfg.headers = cfg.headers || {};
+              (cfg.headers as any).Authorization = `Bearer ${newToken}`;
+              return adminApi.request(cfg);
+            }
+          } catch { }
+        }
+
+        // Start refresh
+        isRefreshing = true;
+
+        refreshPromise = (async () => {
+          try {
+            const refresh = await storage.get("adminRefresh");
+            if (!refresh) throw new Error("No refresh token");
+
+            const res = await axios.post(
+              `${baseURL}/admin/refresh`,
+              { refresh },
+              { timeout: 10000 }
+            );
+
+            if (res.status === 200 && res.data?.access) {
+              const newAccess = res.data.access;
+              const newRefresh = res.data.refresh || refresh;
+
+              await storage.set("adminAccess", newAccess);
+              await storage.set("adminRefresh", newRefresh);
+
+              return newAccess;
+            }
+
+            throw new Error("Refresh failed");
+          } catch (err) {
+            await storage.remove("adminAccess");
+            await storage.remove("adminRefresh");
+            throw err;
+          } finally {
+            isRefreshing = false;
+            setTimeout(() => (refreshPromise = null), 1000);
+          }
+        })();
+
+        try {
+          const newToken = await refreshPromise;
+          if (newToken) {
+            cfg.headers = cfg.headers || {};
+            (cfg.headers as any).Authorization = `Bearer ${newToken}`;
+            return adminApi.request(cfg);
+          }
+        } catch (err) {
+          // Redirect to admin login page
+          if (typeof window !== "undefined") {
+            window.location.href = "/admin/login";
+          }
+          return Promise.reject(err);
+        }
+      }
     } catch { }
+
     return Promise.reject(error);
   }
 );

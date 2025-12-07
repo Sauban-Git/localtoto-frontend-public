@@ -1,6 +1,7 @@
 
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
+import Toast from "react-native-toast-message";
 
 // Async secure storage wrapper
 const storage = {
@@ -65,7 +66,26 @@ api.interceptors.request.use(async (config) => {
       (config.headers as any)["Content-Type"] =
         (config.headers as any)["Content-Type"] || "application/json";
     }
-  } catch (err) { }
+  } catch (err) {
+    let message = "Error while contacting server!";
+
+    if (err instanceof Error) {
+      message = err.message;
+    } else if (
+      typeof err === "object" &&
+      err !== null &&
+      "response" in err &&
+      typeof (err as any).response?.data?.message === "string"
+    ) {
+      message = (err as any).response.data.message;
+    }
+
+    Toast.show({
+      type: "error",
+      text1: "Network error!",
+      text2: message,
+    });
+  }
 
   return config;
 });
