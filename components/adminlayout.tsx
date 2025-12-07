@@ -16,7 +16,7 @@ const AdminLayout: React.FC = () => {
       await AsyncStorage.removeItem("adminRefresh");
       await AsyncStorage.removeItem("adminPhone");
     } catch { }
-    router.replace("/(admin)/login");
+    router.replace("/(admin)/adminLogin");
   };
 
   const menuItems = [
