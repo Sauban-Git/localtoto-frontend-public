@@ -403,7 +403,7 @@ const Waiting = () => {
       <LiveTrackMap isFullScreen={false} />
 
       {!expired ?
-        <MyButton disabled={processing} onPress={cancelBooking} title='Cancel Booking' backgroundColor='red' />
+        <MyButton disabled={processing} onPress={cancelBooking} title='Cancel Booking' backgroundColor='#faa0a0' />
         :
         <MyButton onPress={retrySearch} title='Try again' backgroundColor='#3498db' />
       }
