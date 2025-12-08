@@ -1,5 +1,4 @@
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
@@ -21,10 +20,13 @@ export const Options: React.FC<OptionsProps> = ({ isOpen, onClose }) => {
         <TouchableOpacity style={styles.option} onPress={() => { router.push('/(tabs)/home') }}>
           <Text style={styles.optionText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option} onPress={() => { }}>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/profilePage') }}>
+          <Text style={styles.optionText}>Profile</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/ridesPage') }}>
           <Text style={styles.optionText}>Rides</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option} onPress={() => { }}>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/safetyPage') }}>
           <Text style={styles.optionText}>Safety</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/about') }}>
@@ -35,8 +37,11 @@ export const Options: React.FC<OptionsProps> = ({ isOpen, onClose }) => {
         <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/faqs') }}>
           <Text style={styles.optionText}>FAQs</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option} onPress={() => { }}>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/careersPage') }}>
           <Text style={styles.optionText}>Careers</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/learnmorePage') }}>
+          <Text style={styles.optionText}>Learn more</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.option}

@@ -1,4 +1,3 @@
-import full_logo from '@/assets/images/full_logo.png'
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -15,14 +14,6 @@ const AboutPage = () => {
     <ScrollView style={styles.container}>
 
       <View style={styles.hero}>
-        {/* Full Logo */}
-        {/* <Image */}
-        {/*   source={full_logo} */}
-        {/*   style={{ width: 120, height: 40, borderRadius: 5 }} */}
-        {/*   resizeMode="contain" */}
-        {/* /> */}
-
-
         <Text style={styles.heroTitle}>About Us</Text>
         <Text style={styles.heroSubtitle}>
           Revolutionizing urban transportation with eco-friendly e-rickshaws
