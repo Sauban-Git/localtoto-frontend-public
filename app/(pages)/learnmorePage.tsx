@@ -66,7 +66,7 @@ const LearnMorePage: React.FC = () => {
       <View style={styles.heroSection}>
         <View style={styles.heroContent}>
           <View style={styles.heroText}>
-            <Image source={require('./assets/full_logo.png')} style={styles.heroLogo} />
+            <Image source={require('@/assets/full_logo.png')} style={styles.heroLogo} />
             <Text style={styles.heroTitle}>About Us</Text>
             <Text style={styles.heroSubtitle}>
               Revolutionizing urban transportation with eco-friendly e-rickshaws
