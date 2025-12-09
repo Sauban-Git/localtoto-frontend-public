@@ -66,7 +66,7 @@ const LearnMorePage: React.FC = () => {
       <View style={styles.heroSection}>
         <View style={styles.heroContent}>
           <View style={styles.heroText}>
-            <Image source={require('@/assets/full_logo.png')} style={styles.heroLogo} />
+            <Image source={require('@/assets/images/full_logo.png')} style={styles.heroLogo} />
             <Text style={styles.heroTitle}>About Us</Text>
             <Text style={styles.heroSubtitle}>
               Revolutionizing urban transportation with eco-friendly e-rickshaws
@@ -109,7 +109,7 @@ const LearnMorePage: React.FC = () => {
 
       {/* CTA Section */}
       <View style={styles.ctaSection}>
-        <Image source={require('@/assets/full_logo.png')} style={styles.ctaLogo} />
+        <Image source={require('@/assets/images/full_logo.png')} style={styles.ctaLogo} />
         <Text style={styles.ctaTitle}>Ready to Experience?</Text>
         <Text style={styles.ctaSubtitle}>
           Join thousands of satisfied customers who have made the switch to eco-friendly transportation.
