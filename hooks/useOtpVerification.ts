@@ -90,7 +90,8 @@ export default function useOtpVerification() {
             type: "success",
             text1: "Development build otp ...",
             text2: res.data.devOtp,
-            position: "bottom"
+            position: "bottom",
+            visibilityTime: 6000
           })
         }
         setOtpSent(true);
