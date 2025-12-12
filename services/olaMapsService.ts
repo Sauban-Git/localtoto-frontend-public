@@ -82,7 +82,8 @@ class OlaMapsService {
       Toast.show({
         type: "error",
         text1: "Network Error!",
-        text2: "Network error while connecting server!"
+        text2: "Network error while connecting server!",
+        position: "bottom"
       })
       return null;
     }

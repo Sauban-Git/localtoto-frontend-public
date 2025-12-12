@@ -2,6 +2,7 @@
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import Toast from "react-native-toast-message";
 
 export default function useOtpVerification() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -84,6 +85,14 @@ export default function useOtpVerification() {
 
       if (res.data?.success) {
         console.log(res.data)
+        if (__DEV__) {
+          Toast.show({
+            type: "success",
+            text1: "Development build otp ...",
+            text2: res.data.devOtp,
+            position: "bottom"
+          })
+        }
         setOtpSent(true);
         setOtpSendCount((v) => v + 1);
         setOtpCooldown(45);
