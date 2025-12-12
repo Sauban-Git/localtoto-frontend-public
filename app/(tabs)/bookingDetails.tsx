@@ -1,7 +1,7 @@
 
 import * as SecureStore from "expo-secure-store";
 import useOtpVerification from "@/hooks/useOtpVerification";
-import { Alert, StyleSheet, Text, View } from "react-native"
+import { Alert, StyleSheet, Text, View, KeyboardAvoidingView, Platform, ScrollView } from "react-native"
 import PhoneVerificationCard from "@/components/phoneVerification";
 import RideTypeSelector from "@/components/rideTypeSelector";
 import { useEffect, useState } from "react";
@@ -18,7 +18,6 @@ import LoadingOverlay from "@/components/loadingOverlay";
 const BookingDetail = () => {
 
   const router = useRouter()
-
   const otpHook = useOtpVerification()
   const [selectedRideType, setSelectedRideType] = useState<
     "private" | "shared" | "scheduled"
@@ -39,7 +38,6 @@ const BookingDetail = () => {
 
   const [pageLoading, setPageLoading] = useState<boolean>(false)
   const [processing, setProcessing] = useState(false)
-
 
   const handleBooking = async () => {
     setProcessing(true)
@@ -68,8 +66,6 @@ const BookingDetail = () => {
     router.push('/(riding)/waiting')
   }
 
-
-  // Check stored token
   useEffect(() => {
     const checkAuth = async () => {
       setPageLoading(true)
@@ -96,67 +92,79 @@ const BookingDetail = () => {
 
 
   return (
-    <View style={styles.container}>
-      <AnimatedBackground />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 50 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.container}>
+          <AnimatedBackground />
 
-      {pageLoading && <LoadingOverlay message="Preparing your ride details..." />}
+          {pageLoading && (
+            <LoadingOverlay message="Preparing your ride details..." />
+          )}
 
-      {/* Route Info Card */}
-      <View style={styles.card}>
-        <Text style={styles.label}>PICKUP</Text>
-        <Text style={styles.value}>{rideData?.pickupAddress}</Text>
+          {/* Route Info Card */}
+          <View style={styles.card}>
+            <Text style={styles.label}>PICKUP</Text>
+            <Text style={styles.value}>{rideData?.pickupAddress}</Text>
 
-        <Text style={[styles.label, { marginTop: 12 }]}>DROP</Text>
-        <Text style={styles.value}>{rideData?.dropAddress}</Text>
-      </View>
+            <Text style={[styles.label, { marginTop: 12 }]}>DROP</Text>
+            <Text style={styles.value}>{rideData?.dropAddress}</Text>
+          </View>
 
-      {/* Distance and Durantion */}
-      <View style={[styles.card, styles.rowBetween]}>
-        <View>
-          <Text style={styles.label}>DISTANCE</Text>
-          <Text style={styles.value}>
-            {olaMapsService.formatDistance(rideData?.routeData?.distance || 0) || "—"}
-          </Text>
+          {/* Distance and Duration */}
+          <View style={[styles.card, styles.rowBetween]}>
+            <View>
+              <Text style={styles.label}>DISTANCE</Text>
+              <Text style={styles.value}>
+                {olaMapsService.formatDistance(
+                  rideData?.routeData?.distance || 0
+                ) || "—"}
+              </Text>
+            </View>
+
+            <View>
+              <Text style={styles.label}>DURATION</Text>
+              <Text style={styles.value}>
+                {olaMapsService.formatDuration(
+                  rideData?.routeData?.duration || 0
+                ) || "—"}
+              </Text>
+            </View>
+          </View>
+
+          {/* Verification + Ride Type */}
+          <View style={{ marginBottom: 20 }}>
+            {!otpHook.isAuthenticated && (
+              <PhoneVerificationCard otpHook={otpHook} />
+            )}
+
+            <RideTypeSelector
+              selectedRideType={selectedRideType}
+              setSelectedRideType={setSelectedRideType}
+              fareSolo={fareSolo}
+              fareShared={fareShared}
+              scheduledDate={scheduledDate}
+              scheduledTime={scheduledTime}
+              setScheduledDate={setScheduledDate}
+              setScheduledTime={setScheduledTime}
+            />
+          </View>
+
+          <MyButton title="Book Ride" onPress={handleBooking} disabled={processing} />
         </View>
-
-        <View>
-          <Text style={styles.label}>DURATION</Text>
-          <Text style={styles.value}>
-            {olaMapsService.formatDuration(rideData?.routeData?.duration || 0) || "—"}
-          </Text>
-        </View>
-      </View>
-
-      {/* Verification + Ride Type */}
-      <View style={{ marginBottom: 20 }}>
-        {!otpHook.isAuthenticated && (
-          <PhoneVerificationCard otpHook={otpHook} />
-        )}
-
-        <RideTypeSelector
-          selectedRideType={selectedRideType}
-          setSelectedRideType={setSelectedRideType}
-          fareSolo={fareSolo}
-          fareShared={fareShared}
-          scheduledDate={scheduledDate}
-          scheduledTime={scheduledTime}
-          setScheduledDate={setScheduledDate}
-          setScheduledTime={setScheduledTime}
-        />
-      </View>
-
-      {/* Button */}
-      <MyButton
-        title="Book Ride"
-        onPress={handleBooking}
-        disabled={processing}
-      />
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 export default BookingDetail;
-
 
 const styles = StyleSheet.create({
   container: {

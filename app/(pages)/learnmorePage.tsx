@@ -90,22 +90,6 @@ const LearnMorePage: React.FC = () => {
           </View>
         ))}
       </View>
-
-      {/* How It Works Section */}
-      <View style={styles.howItWorksSection}>
-        <Text style={styles.sectionTitle}>How It Works</Text>
-        {howItWorks.map((step, index) => (
-          <View key={index} style={styles.stepContainer}>
-            <View style={styles.stepCircle}>
-              <Text style={styles.stepNumber}>{step.step}</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>{step.title}</Text>
-              <Text style={styles.stepDescription}>{step.description}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
     </ScrollView>
   );
 };
