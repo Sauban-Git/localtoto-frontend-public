@@ -12,25 +12,5 @@
         "buildType": "apk"
       }
     }
-  },
-  "credentials": {
-    "android": {
-      "production": {
-        "keystore": {
-          "keystorePath": "./keystore.jks",
-          "keystorePassword": "$ANDROID_KEYSTORE_PASSWORD",
-          "keyAlias": "$ANDROID_KEY_ALIAS",
-          "keyPassword": "$ANDROID_KEY_PASSWORD"
-        }
-      },
-      "development": {
-        "keystore": {
-          "keystorePath": "./keystore.jks",
-          "keystorePassword": "$ANDROID_KEYSTORE_PASSWORD",
-          "keyAlias": "$ANDROID_KEY_ALIAS",
-          "keyPassword": "$ANDROID_KEY_PASSWORD"
-        }
-      }
-    }
   }
 }
