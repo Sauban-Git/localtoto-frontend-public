@@ -1,4 +1,4 @@
-name: Expo Build
+name: Expo EAS Build
 
 on:
   push:
@@ -28,22 +28,19 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
 
       - name: Login to Expo
-        uses: expo/expo-github-action@v8
-        with:
-          expo-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+        run: eas login --token ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Android APK
-        run: npx expo build:android --no-wait=false
+        run: eas build --platform android --profile production --non-interactive
 
       - name: Download APK
         run: |
-          APK_URL=$(npx expo url:apk)
-          echo "APK_URL=$APK_URL"
+          eas build:list --platform android --limit 1 --json > builds.json
+          APK_URL=$(jq -r '.[0].artifacts.buildUrl' builds.json)
           curl -L $APK_URL -o app-release.apk
 
       - name: Upload APK Artifact
