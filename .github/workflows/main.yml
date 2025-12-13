@@ -3,7 +3,7 @@ name: Build ARM64 APK Artifact
 on:
   push:
     branches:
-      - test
+      - main
   workflow_dispatch:
 
 jobs:
