@@ -1,4 +1,5 @@
 import Toast from "react-native-toast-message";
+import Constants from 'expo-constants'
 
 // Ola Maps Service for frontend
 export interface MapCoordinates {
@@ -51,7 +52,7 @@ export interface ReverseGeocodingResponse {
 }
 
 class OlaMapsService {
-  private baseUrl = __DEV__ ? `${process.env?.EXPO_PUBLIC_API_BASE_URL}/api/bookings` : `${process.env?.EXPO_PUBLIC_API_BASE_URL}/bookings`;
+  private baseUrl = __DEV__ ? `${Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL}/api/bookings` : `${Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL}/bookings`;
 
   async getRoute(
     pickup: MapCoordinates | null,

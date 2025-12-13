@@ -2,6 +2,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
+import Constants from "expo-constants";
 
 // Async secure storage wrapper
 const storage = {
@@ -15,7 +16,7 @@ const storage = {
 let rideFlowFlag = false;
 
 // Base URL
-const baseURL = __DEV__ ? `${process.env?.EXPO_PUBLIC_API_BASE_URL}/api` : process.env?.EXPO_PUBLIC_API_BASE_URL;
+const baseURL = __DEV__ ? `${Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL}/api` : Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL;
 
 if (!baseURL) {
   console.warn("[API] EXPO_PUBLIC_API_BASE_URL is not defined!");
