@@ -17,11 +17,13 @@ export default function OlaSearchInput({
   onCurrentLocation,
   onSelect,
   externalLocation,
+  isLoading,
 }: {
   placeholder: string;
   onSelect: (location: { lat: number; lng: number; address: string; }) => void;
   onCurrentLocation: () => void;
   externalLocation?: { lat: number; lng: number; address: string; } | null;
+  isLoading: boolean
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
@@ -169,17 +171,25 @@ export default function OlaSearchInput({
 
         {/* Current Location Button */}
         <TouchableOpacity
-          onPress={onCurrentLocation}
+          onPress={isLoading ? undefined : onCurrentLocation}
+          disabled={isLoading}
           style={{
             position: "absolute",
             right: 8,
             backgroundColor: "#16a34a",
             padding: 7,
             borderRadius: 8,
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <Ionicons name="locate" size={18} color="white" />
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Ionicons name="locate" size={18} color="white" />
+          )}
         </TouchableOpacity>
+
       </View>
 
       {/* Loader */}

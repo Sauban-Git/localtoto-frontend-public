@@ -20,6 +20,8 @@ const Home = () => {
   const [dropCoords, setDrop] = useState<MapCoordinates | null>(null);
   const [dropAddress, setDropAddress] = useState<string>("")
   const [processing, setProcessing] = useState(false)
+  const [pickupLoading, setPickupLoading] = useState(false)
+  const [dropLoading, setDropLoading] = useState(false)
   const router = useRouter()
 
   const [location, setLocation] = useState<LocationState>(null)
@@ -79,24 +81,56 @@ const Home = () => {
   }, [])
 
   const useCurrentLocationForPickUp = async () => {
-    if (!location) return
+    if (!location) return;
 
-    const data = await olaMapsService.reverseGeocode(location.coords.latitude, location.coords.longitude)
-    if (data?.success) {
+    setPickupLoading(true);
 
-      const currentLocation = { lat: location?.coords.latitude, lng: location?.coords.longitude, address: data.address }
-      setCurrPickUp(currentLocation)
+    try {
+      const data = await olaMapsService.reverseGeocode(
+        location.coords.latitude,
+        location.coords.longitude
+      );
+
+      if (data?.success && data.address) {
+        const currentLocation = {
+          lat: location.coords.latitude,
+          lng: location.coords.longitude,
+          address: data.address
+        };
+        setCurrPickUp(currentLocation);
+      } else {
+      }
+    } catch {
+    } finally {
+      setPickupLoading(false);
     }
-  }
+  };
+
   const useCurrentLocationForDropOff = async () => {
-    if (!location) return
-    const data = await olaMapsService.reverseGeocode(location.coords.latitude, location.coords.longitude)
-    if (data?.success) {
-      const currentLocation = { lat: location?.coords.latitude, lng: location?.coords.longitude, address: data.address }
-      setCurrDropOff(currentLocation)
-    }
-  }
+    if (!location) return;
 
+    setDropLoading(true);
+
+    try {
+      const data = await olaMapsService.reverseGeocode(
+        location.coords.latitude,
+        location.coords.longitude
+      );
+
+      if (data?.success && data.address) {
+        const currentLocation = {
+          lat: location.coords.latitude,
+          lng: location.coords.longitude,
+          address: data.address
+        };
+        setCurrDropOff(currentLocation);
+      } else {
+      }
+    } catch (error) {
+    } finally {
+      setDropLoading(false);
+    }
+  };
 
 
   return (
@@ -123,6 +157,7 @@ const Home = () => {
 
           <LocationSelector
             label="Pickup"
+            isLoading={pickupLoading}
             iconColor="#16a34a"
             value={pickupAddress}
             onSelectLocation={(coords, address) => {
@@ -135,6 +170,7 @@ const Home = () => {
 
           <LocationSelector
             label="Drop"
+            isLoading={dropLoading}
             value={dropAddress}
             iconColor="#2563eb"
             onSelectLocation={(coords, address) => {
