@@ -26,6 +26,11 @@ jobs:
       - name: Install Expo & EAS
         run: npm install -g expo-cli eas-cli
 
+      - name: Setup Android Keystore
+        run: |
+          echo $ANDROID_KEYSTORE_BASE64 | base64 --decode > keystore.jks
+    
+
       - name: Build APK with EAS
         id: eas-build
         env:
