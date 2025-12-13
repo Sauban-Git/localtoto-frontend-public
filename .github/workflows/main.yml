@@ -1,8 +1,11 @@
-name: Expo EAS Build
+name: Build APK Artifact
 
 on:
   push:
-    branches: [test]
+    branches:
+      - test
+    paths:
+      - "**"
   workflow_dispatch:
 
 jobs:
@@ -20,31 +23,40 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
+          cache: "npm"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
-
-      - name: Login to Expo
-        run: eas login --token ${{ secrets.EXPO_TOKEN }}
-
-      - name: Build Android APK
-        run: eas build --platform android --profile production --non-interactive
-
-      - name: Download APK
+      - name: Create .env file for Expo
         run: |
-          eas build:list --platform android --limit 1 --json > builds.json
-          APK_URL=$(jq -r '.[0].artifacts.buildUrl' builds.json)
-          curl -L $APK_URL -o app-release.apk
+          echo "EXPO_PUBLIC_API_KEY=${EXPO_PUBLIC_API_KEY}" >> .env
+          echo "EXPO_PUBLIC_API_BASE_URL=${EXPO_PUBLIC_API_BASE_URL}" >> .env
+          echo "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}" >> .env
+          echo "EXPO_PUBLIC_OLA_MAPS_PROJECT_ID=${EXPO_PUBLIC_OLA_MAPS_PROJECT_ID}" >> .env
+          echo "EXPO_PUBLIC_OLA_MAPS_API_KEY=${EXPO_PUBLIC_OLA_MAPS_API_KEY}" >> .env
+
+      - name: Prebuild Android project
+        run: npx expo prebuild --platform android
+
+      - name: Build Release APK
+        run: npx expo run:android --variant release
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: expo-apk
-          path: app-release.apk
+          name: android-release-apk
+          path: android/app/build/outputs/apk/release/*.apk

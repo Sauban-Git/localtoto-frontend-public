@@ -1,13 +1,15 @@
 {
   "build": {
     "production": {
+      "distribution": "store",
       "android": {
-        "workflow": "managed"
+        "buildType": "apk"
       }
     },
     "development": {
+      "distribution": "internal",
       "android": {
-        "workflow": "managed"
+        "buildType": "apk"
       }
     }
   }
