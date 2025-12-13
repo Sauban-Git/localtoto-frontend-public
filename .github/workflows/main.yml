@@ -1,11 +1,9 @@
-name: Build APK Artifact
+name: Build ARM64 APK Artifact
 
 on:
   push:
     branches:
       - test
-    paths:
-      - "**"
   workflow_dispatch:
 
 jobs:
@@ -20,14 +18,14 @@ jobs:
       EXPO_PUBLIC_OLA_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_OLA_MAPS_API_KEY }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: "npm"
+          cache: npm
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -41,22 +39,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create .env file for Expo
+      - name: Create .env
         run: |
-          echo "EXPO_PUBLIC_API_KEY=${EXPO_PUBLIC_API_KEY}" >> .env
-          echo "EXPO_PUBLIC_API_BASE_URL=${EXPO_PUBLIC_API_BASE_URL}" >> .env
-          echo "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}" >> .env
-          echo "EXPO_PUBLIC_OLA_MAPS_PROJECT_ID=${EXPO_PUBLIC_OLA_MAPS_PROJECT_ID}" >> .env
-          echo "EXPO_PUBLIC_OLA_MAPS_API_KEY=${EXPO_PUBLIC_OLA_MAPS_API_KEY}" >> .env
+          echo "EXPO_PUBLIC_API_KEY=$EXPO_PUBLIC_API_KEY" >> .env
+          echo "EXPO_PUBLIC_API_BASE_URL=$EXPO_PUBLIC_API_BASE_URL" >> .env
+          echo "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=$EXPO_PUBLIC_GOOGLE_MAPS_API_KEY" >> .env
+          echo "EXPO_PUBLIC_OLA_MAPS_PROJECT_ID=$EXPO_PUBLIC_OLA_MAPS_PROJECT_ID" >> .env
+          echo "EXPO_PUBLIC_OLA_MAPS_API_KEY=$EXPO_PUBLIC_OLA_MAPS_API_KEY" >> .env
 
-      - name: Prebuild Android project
+      - name: Expo prebuild
         run: npx expo prebuild --platform android
 
-      - name: Build Release APK
-        run: npx expo run:android --variant release
+      - name: Build ARM64 Release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 
-      - name: Upload APK Artifact
+      - name: Upload ARM64 APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-release-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          name: android-arm64-apk
+          path: android/app/build/outputs/apk/release/*arm64-v8a*.apk
