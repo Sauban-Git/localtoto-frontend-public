@@ -85,15 +85,13 @@ export default function useOtpVerification() {
 
       if (res.data?.success) {
         console.log(res.data)
-        if (__DEV__) {
-          Toast.show({
-            type: "success",
-            text1: "Development build otp ...",
-            text2: res.data.devOtp,
-            position: "bottom",
-            visibilityTime: 6000
-          })
-        }
+        Toast.show({
+          type: "success",
+          text1: "Development build otp ...",
+          text2: res.data.devOtp,
+          position: "top",
+          visibilityTime: 6000
+        })
         setOtpSent(true);
         setOtpSendCount((v) => v + 1);
         setOtpCooldown(45);
