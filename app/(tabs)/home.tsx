@@ -14,6 +14,7 @@ import Toast from "react-native-toast-message"
 import MapOverlay from "@/components/mapOverlay";
 
 type LocationState = Location.LocationObject | null;
+type ActiveField = "pickup" | "drop" | null;
 
 const Home = () => {
   const [pickupCoords, setPickup] = useState<MapCoordinates | null>(null);
@@ -25,6 +26,7 @@ const Home = () => {
   const [dropLoading, setDropLoading] = useState(false)
   const router = useRouter()
 
+  const [activeField, setActiveField] = useState<ActiveField>(null);
   const [mapOpen, setMapOpen] = useState(false);
   const [location, setLocation] = useState<LocationState>(null)
   const [currPickUp, setCurrPickUp] = useState<{ lat: number, lng: number, address: string } | null>(null)
@@ -138,6 +140,33 @@ const Home = () => {
     }
   };
 
+  const handleMapPick = async (coords: MapCoordinates) => {
+    try {
+      const data = await olaMapsService.reverseGeocode(
+        coords.lat,
+        coords.lng
+      );
+
+      if (data?.success && data.address) {
+        const currentLocation = {
+          lat: coords.lat,
+          lng: coords.lng,
+          address: data.address
+        };
+        if (activeField === "drop") {
+          setCurrDropOff(currentLocation);
+        }
+        else {
+          setCurrPickUp(currentLocation)
+        }
+      } else {
+      }
+    } catch {
+    } finally {
+      setPickupLoading(false);
+    }
+  };
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -162,7 +191,10 @@ const Home = () => {
           </View>
 
           <LocationSelector
-            setOpenMap={() => setMapOpen(true)}
+            setOpenMap={() => {
+              setActiveField("pickup");
+              setMapOpen(true);
+            }}
             label="Pickup"
             iconColor="#16a34a"
             value={pickupAddress}
@@ -175,7 +207,10 @@ const Home = () => {
           />
 
           <LocationSelector
-            setOpenMap={() => setMapOpen(true)}
+            setOpenMap={() => {
+              setActiveField("drop");
+              setMapOpen(true);
+            }}
             label="Drop"
             value={dropAddress}
             iconColor="#2563eb"
@@ -188,6 +223,7 @@ const Home = () => {
           />
 
           <MapOverlay
+            onPickLocation={handleMapPick}
             visible={mapOpen}
             onClose={() => setMapOpen(false)}
           />

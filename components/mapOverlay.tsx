@@ -1,23 +1,28 @@
 
 import { useEffect, useState } from "react";
 import * as Location from "expo-location";
-import MapView, { Marker, Region } from "react-native-maps";
+import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
 import { Modal, View, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { type MapCoordinates } from "@/services/olaMapsService";
 
 export default function MapOverlay({
   visible,
   onClose,
+  onPickLocation,
 }: {
   visible: boolean;
   onClose: () => void;
+  onPickLocation: (location: MapCoordinates) => void
 }) {
 
   const [region, setRegion] = useState<Region | null>(null);
+  const [picked, setPicked] = useState<MapCoordinates | null>(
+    null
+  );
 
   useEffect(() => {
     if (!visible) return;
-
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") return;
@@ -32,6 +37,20 @@ export default function MapOverlay({
       });
     })();
   }, [visible]);
+
+  const handleMapPress = (e: MapPressEvent) => {
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+
+    const location = {
+      lat: latitude,
+      lng: longitude,
+    };
+
+    setPicked(location);
+
+    // 🔥 expose to parent immediately
+    onPickLocation(location);
+  };
 
   return (
     <Modal visible={visible} animationType="slide">
@@ -53,17 +72,27 @@ export default function MapOverlay({
           </TouchableOpacity>
 
           <Text style={{ marginLeft: 12, fontSize: 16, fontWeight: "600" }}>
-            Select location
+            Select location by tapping
           </Text>
         </View>
 
         {/* Map */}
         {region && (
           <MapView
+            onPress={handleMapPress}
             style={{ flex: 1 }}
             region={region}
             showsUserLocation={false}
           >
+            {picked && (
+              <Marker
+                pinColor="green"
+                coordinate={{
+                  latitude: picked.lat,
+                  longitude: picked.lng,
+                }}
+              />
+            )}
             <Marker
               coordinate={{
                 latitude: region.latitude,
