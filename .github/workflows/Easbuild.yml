@@ -31,7 +31,7 @@ jobs:
 
       - name: Setup Android Keystore (Decode from Secrets)
         run: |
-          echo ${{ secrets.ANDROID_KEYSTORE_BASE64 }} | base64 --decode > release.keystore
+          echo ${{ secrets.ANDROID_KEYSTORE_BASE64 }} | base64 --decode > keystore-${{ github.run_id }}.keystore
 
       - name: Build APK with EAS
         id: eas-build
