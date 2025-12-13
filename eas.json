@@ -3,13 +3,29 @@
     "production": {
       "distribution": "store",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "credentials": {
+          "androidKeystore": {
+            "keystorePath": "./keystore.jks",
+            "keystorePassword": "$ANDROID_KEYSTORE_PASSWORD",
+            "keyAlias": "$ANDROID_KEY_ALIAS",
+            "keyPassword": "$ANDROID_KEY_PASSWORD"
+          }
+        }
       }
     },
     "development": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "credentials": {
+          "androidKeystore": {
+            "keystorePath": "./keystore.jks",
+            "keystorePassword": "$ANDROID_KEYSTORE_PASSWORD",
+            "keyAlias": "$ANDROID_KEY_ALIAS",
+            "keyPassword": "$ANDROID_KEY_PASSWORD"
+          }
+        }
       }
     }
   }
