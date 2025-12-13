@@ -1,4 +1,5 @@
 
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
@@ -54,6 +55,7 @@ export default function MapOverlay({
 
   return (
     <Modal visible={visible} animationType="slide">
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={{ flex: 1 }}>
         {/* Header */}
         <View
@@ -104,6 +106,7 @@ export default function MapOverlay({
         )}
 
       </View>
+      </SafeAreaView>
     </Modal>
   );
 }
