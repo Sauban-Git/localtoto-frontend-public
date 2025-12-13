@@ -1,29 +1,22 @@
 
-import * as SecureStore from "expo-secure-store";
-import useOtpVerification from "@/hooks/useOtpVerification";
-import { Alert, StyleSheet, Text, View, KeyboardAvoidingView, Platform, ScrollView } from "react-native"
-import PhoneVerificationCard from "@/components/phoneVerification";
+import { StyleSheet, Text, View, KeyboardAvoidingView, Platform, ScrollView } from "react-native"
 import RideTypeSelector from "@/components/rideTypeSelector";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRideStore } from "@/stores/bookingConfirmStore";
 import useFareEstimator from "@/hooks/useFareEstimator";
 import olaMapsService from "@/services/olaMapsService";
 import AnimatedBackground from "@/components/animatedBackground";
 import MyButton from "@/components/button";
 import { BookingState } from "@/types/type";
-import api from "@/services/api";
 import { useRouter } from "expo-router";
 import LoadingOverlay from "@/components/loadingOverlay";
 
 const BookingDetail = () => {
 
   const router = useRouter()
-  const otpHook = useOtpVerification()
   const [selectedRideType, setSelectedRideType] = useState<
     "private" | "shared" | "scheduled"
   >("private");
-
-  const [phoneNumber, setPhoneNumber] = useState<string | null>(null)
 
   const rideData = useRideStore((state) => state.confirmationData)
   const setRideData = useRideStore((state) => state.setConfirmationData);
@@ -36,13 +29,10 @@ const BookingDetail = () => {
     rideData?.dropCoords || null
   );
 
-  const [pageLoading, setPageLoading] = useState<boolean>(false)
   const [processing, setProcessing] = useState(false)
 
   const handleBooking = async () => {
     setProcessing(true)
-
-    if (!otpHook.phoneNumber || !rideData) return setProcessing(false)
 
     const routeData = await olaMapsService.getRoute(rideData?.pickupCoords || null, rideData?.dropCoords || null)
     const bookingData: BookingState = {
@@ -53,7 +43,6 @@ const BookingDetail = () => {
       rideType: selectedRideType,
       firstName: 'User',
       lastName: '',
-      phoneNumber: otpHook.phoneNumber,
       scheduledDate: scheduledDate,
       scheduledTime: scheduledTime,
       bookingForSelf: selectedRideType === 'private',
@@ -63,33 +52,8 @@ const BookingDetail = () => {
     setRideData(bookingData)
 
     setProcessing(false)
-    router.push('/(riding)/waiting')
+    router.push('/(tabs)/verifyPhone')
   }
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      setPageLoading(true)
-      try {
-        const token = await SecureStore.getItemAsync('token');
-        if (token) {
-          const response = await api.get('/users/profile');
-          if (response.data?.success) {
-            setPhoneNumber(response.data.user.phoneNumber || '');
-          } else {
-            router.replace('/(tabs)/home')
-          }
-        }
-      } catch {
-        Alert.alert("Verify your phone first ...")
-        router.replace('/(tabs)/home')
-      } finally {
-        setPageLoading(false)
-      }
-    };
-
-    checkAuth();
-  }, []);
-
 
   return (
     <KeyboardAvoidingView
@@ -104,10 +68,6 @@ const BookingDetail = () => {
       >
         <View style={styles.container}>
           <AnimatedBackground />
-
-          {pageLoading && (
-            <LoadingOverlay message="Preparing your ride details..." />
-          )}
 
           {/* Route Info Card */}
           <View style={styles.card}>
@@ -141,10 +101,6 @@ const BookingDetail = () => {
 
           {/* Verification + Ride Type */}
           <View style={{ marginBottom: 20 }}>
-            {!otpHook.isAuthenticated && (
-              <PhoneVerificationCard otpHook={otpHook} />
-            )}
-
             <RideTypeSelector
               selectedRideType={selectedRideType}
               setSelectedRideType={setSelectedRideType}

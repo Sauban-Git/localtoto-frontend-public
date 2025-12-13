@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native"
 import Toast from "react-native-toast-message"
+import MapOverlay from "@/components/mapOverlay";
 
 type LocationState = Location.LocationObject | null;
 
@@ -24,6 +25,7 @@ const Home = () => {
   const [dropLoading, setDropLoading] = useState(false)
   const router = useRouter()
 
+  const [mapOpen, setMapOpen] = useState(false);
   const [location, setLocation] = useState<LocationState>(null)
   const [currPickUp, setCurrPickUp] = useState<{ lat: number, lng: number, address: string } | null>(null)
   const [currDropoff, setCurrDropOff] = useState<{ lat: number, lng: number, address: string } | null>(null)
@@ -80,7 +82,11 @@ const Home = () => {
     getLocation()
   }, [])
 
-  const useCurrentLocationForPickUp = async () => {
+  useEffect(() => {
+    currentLocationForPickUp()
+  }, [location])
+
+  const currentLocationForPickUp = async () => {
     if (!location) return;
 
     setPickupLoading(true);
@@ -106,7 +112,7 @@ const Home = () => {
     }
   };
 
-  const useCurrentLocationForDropOff = async () => {
+  const currentLocationForDropOff = async () => {
     if (!location) return;
 
     setDropLoading(true);
@@ -156,8 +162,8 @@ const Home = () => {
           </View>
 
           <LocationSelector
+            setOpenMap={() => setMapOpen(true)}
             label="Pickup"
-            isLoading={pickupLoading}
             iconColor="#16a34a"
             value={pickupAddress}
             onSelectLocation={(coords, address) => {
@@ -165,12 +171,12 @@ const Home = () => {
               setPickupAddress(address);
             }}
             externalLocation={currPickUp}
-            onCurrentLocation={useCurrentLocationForPickUp}
+            onCurrentLocation={currentLocationForPickUp}
           />
 
           <LocationSelector
+            setOpenMap={() => setMapOpen(true)}
             label="Drop"
-            isLoading={dropLoading}
             value={dropAddress}
             iconColor="#2563eb"
             onSelectLocation={(coords, address) => {
@@ -178,7 +184,12 @@ const Home = () => {
               setDropAddress(address);
             }}
             externalLocation={currDropoff}
-            onCurrentLocation={useCurrentLocationForDropOff}
+            onCurrentLocation={currentLocationForDropOff}
+          />
+
+          <MapOverlay
+            visible={mapOpen}
+            onClose={() => setMapOpen(false)}
           />
 
           <MyButton title="Book" disabled={processing} backgroundColor="white" onPress={handleBooking} />

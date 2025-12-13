@@ -17,19 +17,20 @@ export default function OlaSearchInput({
   onCurrentLocation,
   onSelect,
   externalLocation,
-  isLoading,
+  setOpenMap
 }: {
   placeholder: string;
   onSelect: (location: { lat: number; lng: number; address: string; }) => void;
   onCurrentLocation: () => void;
   externalLocation?: { lat: number; lng: number; address: string; } | null;
-  isLoading: boolean
+  setOpenMap: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSelected, setIsSelected] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -49,7 +50,8 @@ export default function OlaSearchInput({
       try {
         const data = await olaMapsService.geocode(address);
         if (!data?.success || data.results.length === 0) {
-          setError("Location not found");
+          console.log(data)
+          setError("Service unavailable in this area");
           return;
         }
 
@@ -171,25 +173,17 @@ export default function OlaSearchInput({
 
         {/* Current Location Button */}
         <TouchableOpacity
-          onPress={isLoading ? undefined : onCurrentLocation}
-          disabled={isLoading}
+          onPress={setOpenMap}
           style={{
             position: "absolute",
             right: 8,
             backgroundColor: "#16a34a",
             padding: 7,
             borderRadius: 8,
-            justifyContent: "center",
-            alignItems: "center",
           }}
         >
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Ionicons name="locate" size={18} color="white" />
-          )}
+          <Ionicons name="locate" size={18} color="white" />
         </TouchableOpacity>
-
       </View>
 
       {/* Loader */}
