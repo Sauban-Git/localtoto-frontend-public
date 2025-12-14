@@ -52,7 +52,7 @@ export interface ReverseGeocodingResponse {
 }
 
 class OlaMapsService {
-  private baseUrl = __DEV__ ? `${Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL}/api/bookings` : `${Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL}/bookings`;
+  private baseUrl = __DEV__ ? `${Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL}/api/bookings` : `${Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL}/bookings`;
 
   async getRoute(
     pickup: MapCoordinates | null,
@@ -61,6 +61,7 @@ class OlaMapsService {
   ): Promise<RouteResponse | null> {
 
     try {
+      console.log(this.baseUrl)
       const response = await fetch(`${this.baseUrl}/route`, {
         method: 'POST',
         headers: {
@@ -92,6 +93,8 @@ class OlaMapsService {
 
   async geocode(query: string): Promise<GeocodingResponse | null> {
     try {
+
+      console.log(this.baseUrl)
 
       const response = await fetch(`${this.baseUrl}/geocode?q=${encodeURIComponent(query)}`);
 

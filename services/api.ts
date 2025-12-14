@@ -16,7 +16,7 @@ const storage = {
 let rideFlowFlag = false;
 
 // Base URL
-const baseURL = __DEV__ ? `${Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL}/api` : Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL;
+const baseURL = __DEV__ ? `${Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL}/api` : Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL;
 
 if (!baseURL) {
   console.warn("[API] EXPO_PUBLIC_API_BASE_URL is not defined!");

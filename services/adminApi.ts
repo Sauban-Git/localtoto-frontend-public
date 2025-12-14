@@ -13,8 +13,8 @@ const storage = {
 
 /* ---------- Base URL ---------- */
 const baseURL = __DEV__
-  ? `${Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL}/api`
-  : Constants.manifest.extra.EXPO_PUBLIC_API_BASE_URL;
+  ? `${Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL}/api`
+  : Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL;
 
 if (!baseURL) {
   console.warn("[AdminAPI] EXPO_PUBLIC_API_BASE_URL is not defined!");
