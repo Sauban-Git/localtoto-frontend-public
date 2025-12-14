@@ -30,11 +30,12 @@ export default function PhoneVerificationCard({ otpHook }: PhoneVerificationCard
   if (isAuthenticated) return null;
 
   return (
-    <View style={{ padding: 20,
-      elevation: 5,
-  borderWidth: 2,
-  borderColor: '#ddd',
-  borderRadius: 10, }}>
+    <View style={{
+      padding: 20,
+      borderWidth: 2,
+      borderColor: '#ddd',
+      borderRadius: 10,
+    }}>
       <AnimatedBackground />
       <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 12 }}>
         Verify Your Phone Number

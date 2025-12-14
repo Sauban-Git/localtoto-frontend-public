@@ -365,7 +365,6 @@ const Waiting = () => {
         </Text>
 
         {!expired ? <Text> Waiting <Text> {formatTime(waitingTime)}</Text> </Text> : <Text>No Drivers Found</Text>}
-        {expired && <MyButton title='Simulate fake driver' onPress={simulateDriverAssignment} backgroundColor='#3498db' />}
         <View style={{ flexDirection: "row", marginTop: 12 }}>
           <PulsingDot active={!expired} expired={expired} />
           <PulsingDot active={false} expired={expired} />
