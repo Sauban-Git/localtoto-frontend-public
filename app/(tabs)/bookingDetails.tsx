@@ -9,7 +9,6 @@ import AnimatedBackground from "@/components/animatedBackground";
 import MyButton from "@/components/button";
 import { BookingState } from "@/types/type";
 import { useRouter } from "expo-router";
-import LoadingOverlay from "@/components/loadingOverlay";
 
 const BookingDetail = () => {
 

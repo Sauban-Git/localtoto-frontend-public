@@ -8,7 +8,7 @@ import StepIndicator from '@/components/stepIndicator';
 import useRiderOtpVerification from '@/hooks/useRiderOtpVerification';
 import api from '@/services/api';
 import React, { useState, useEffect } from 'react';
-import { View, Button, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 
 const BecomeRider = () => {
   const [step, setStep] = useState(1);

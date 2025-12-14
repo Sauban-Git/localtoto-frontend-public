@@ -35,10 +35,6 @@ Notifications.setNotificationHandler({
 const Waiting = () => {
 
   // Notifications
-  const [expoPushToken, setExpoPushToken] = useState('')
-  const [channels, setChannels] = useState<Notifications.NotificationChannel[]>([])
-  const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined)
-
   const razorpayKey = process.env?.EXPO_PUBLIC_RAZORPAY_KEY_ID as string | undefined;
   const progressAnim = useSharedValue(0);
   const progressStyle = useAnimatedStyle(() => {
@@ -72,8 +68,6 @@ const Waiting = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [searchStatus, setSearchStatus] = useState<string>('Finding drivers...');
   const [scanProgress, setScanProgress] = useState<number>(0);
-  const [bootLoading, setBootLoading] = useState<boolean>(true);
-  const progress = useSharedValue<number>(0);
   const [pageLoading, setPageLoading] = useState<boolean>(false);
 
   //razorpay

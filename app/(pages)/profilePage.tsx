@@ -27,7 +27,6 @@ const ProfilePage = () => {
     (async () => {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
-        router.replace("/signin");
         return;
       }
 
@@ -37,7 +36,6 @@ const ProfilePage = () => {
         setAvatarUrl(res.data?.user?.profilePhoto?.url || "");
       } catch (e: any) {
         if (e?.response?.status === 401) {
-          router.replace("/signin");
           return;
         }
         Alert.alert("Error", e?.response?.data?.message || "Failed to load profile");
@@ -140,7 +138,7 @@ const ProfilePage = () => {
               onPress={async () => {
                 await AsyncStorage.removeItem("token");
                 await AsyncStorage.removeItem("refreshToken");
-                router.replace("/signin");
+                // router.replace("/signin");
               }}
             >
               <Text style={styles.logoutBtnText}>Log out</Text>
@@ -166,25 +164,26 @@ const ProfilePage = () => {
 
             <TouchableOpacity
               onPress={() =>
-                router.push({
-                  pathname: "/booking-confirmation",
-                  params: {
-                    rideId: b.id,
-                    pickupAddress: b.pickup_description,
-                    dropAddress: b.dropoff_description,
-                    pickupCoords: JSON.stringify({
-                      lat: b.pickup_lat,
-                      lng: b.pickup_lng,
-                    }),
-                    dropCoords: JSON.stringify({
-                      lat: b.dropoff_lat,
-                      lng: b.dropoff_lng,
-                    }),
-                    fare: b.fare,
-                    distance: b.distance_km,
-                    duration: b.duration_text,
-                  },
-                })
+                // router.push({
+                //   pathname: "/booking-confirmation",
+                //   params: {
+                //     rideId: b.id,
+                //     pickupAddress: b.pickup_description,
+                //     dropAddress: b.dropoff_description,
+                //     pickupCoords: JSON.stringify({
+                //       lat: b.pickup_lat,
+                //       lng: b.pickup_lng,
+                //     }),
+                //     dropCoords: JSON.stringify({
+                //       lat: b.dropoff_lat,
+                //       lng: b.dropoff_lng,
+                //     }),
+                //     fare: b.fare,
+                //     distance: b.distance_km,
+                //     duration: b.duration_text,
+                //   },
+                // })
+                console.log(" ")
               }
             >
               <Text style={styles.viewText}>View</Text>
@@ -205,25 +204,26 @@ const ProfilePage = () => {
             <TouchableOpacity
               style={styles.historyRow}
               onPress={() =>
-                router.push({
-                  pathname: "/booking-confirmation",
-                  params: {
-                    rideId: b.id,
-                    pickupAddress: b.pickup_description,
-                    dropAddress: b.dropoff_description,
-                    pickupCoords: JSON.stringify({
-                      lat: b.pickup_lat,
-                      lng: b.pickup_lng,
-                    }),
-                    dropCoords: JSON.stringify({
-                      lat: b.dropoff_lat,
-                      lng: b.dropoff_lng,
-                    }),
-                    fare: b.fare,
-                    distance: b.distance_km,
-                    duration: b.duration_text,
-                  },
-                })
+                // router.push({
+                //   pathname: "/booking-confirmation",
+                //   params: {
+                //     rideId: b.id,
+                //     pickupAddress: b.pickup_description,
+                //     dropAddress: b.dropoff_description,
+                //     pickupCoords: JSON.stringify({
+                //       lat: b.pickup_lat,
+                //       lng: b.pickup_lng,
+                //     }),
+                //     dropCoords: JSON.stringify({
+                //       lat: b.dropoff_lat,
+                //       lng: b.dropoff_lng,
+                //     }),
+                //     fare: b.fare,
+                //     distance: b.distance_km,
+                //     duration: b.duration_text,
+                //   },
+                // })
+                console.log("")
               }
             >
               <Text style={styles.rideTitle}>

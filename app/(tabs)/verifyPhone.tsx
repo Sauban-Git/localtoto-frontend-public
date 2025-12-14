@@ -4,7 +4,6 @@ import PhoneVerificationCard from "@/components/phoneVerification";
 import useOtpVerification from "@/hooks/useOtpVerification";
 import { useRideStore } from "@/stores/bookingConfirmStore";
 import { BookingState } from "@/types/type";
-import MyButton from "@/components/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import AnimatedBackground from "@/components/animatedBackground";
