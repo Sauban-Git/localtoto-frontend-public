@@ -28,7 +28,6 @@ const ProfilePage = () => {
     (async () => {
       const token = await SecureStore.getItemAsync("token");
       if (!token) {
-        console.log("no token")
         return;
       }
 
@@ -192,6 +191,7 @@ const ProfilePage = () => {
 
               </View>
             ))}
+
           </View>
 
           {/* Full Ride History */}
@@ -237,6 +237,7 @@ const ProfilePage = () => {
               )}
             />
           </View> </View>}
+
     </ScrollView>
   );
 };
