@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   StyleSheet
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { useRouter } from "expo-router"
 import adminApi from '../../services/adminApi';
 

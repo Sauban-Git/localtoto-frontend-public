@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   StyleSheet
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import adminApi from '../../services/adminApi';
 import { useRouter } from 'expo-router';
 
