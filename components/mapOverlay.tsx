@@ -49,63 +49,62 @@ export default function MapOverlay({
 
     setPicked(location);
 
-    // 🔥 expose to parent immediately
     onPickLocation(location);
   };
 
   return (
     <Modal visible={visible} animationType="slide">
       <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={{ flex: 1 }}>
-        {/* Header */}
-        <View
-          style={{
-            height: 56,
-            flexDirection: "row",
-            alignItems: "center",
-            paddingHorizontal: 12,
-            borderBottomWidth: 1,
-            borderBottomColor: "#eee",
-            backgroundColor: "white",
-          }}
-        >
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="arrow-back" size={24} />
-          </TouchableOpacity>
-
-          <Text style={{ marginLeft: 12, fontSize: 16, fontWeight: "600" }}>
-            Select location by tapping
-          </Text>
-        </View>
-
-        {/* Map */}
-        {region && (
-          <MapView
-            onPress={handleMapPress}
-            style={{ flex: 1 }}
-            region={region}
-            showsUserLocation={false}
+        <View style={{ flex: 1 }}>
+          {/* Header */}
+          <View
+            style={{
+              height: 56,
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: "#eee",
+              backgroundColor: "white",
+            }}
           >
-            {picked && (
-              <Marker
-                pinColor="green"
-                coordinate={{
-                  latitude: picked.lat,
-                  longitude: picked.lng,
-                }}
-              />
-            )}
-            <Marker
-              coordinate={{
-                latitude: region.latitude,
-                longitude: region.longitude,
-              }}
-              title="Your location"
-            />
-          </MapView>
-        )}
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="arrow-back" size={24} />
+            </TouchableOpacity>
 
-      </View>
+            <Text style={{ marginLeft: 12, fontSize: 16, fontWeight: "600" }}>
+              Select location by tapping
+            </Text>
+          </View>
+
+          {/* Map */}
+          {region && (
+            <MapView
+              onPress={handleMapPress}
+              style={{ flex: 1 }}
+              region={region}
+              showsUserLocation={false}
+            >
+              {picked && (
+                <Marker
+                  pinColor="green"
+                  coordinate={{
+                    latitude: picked.lat,
+                    longitude: picked.lng,
+                  }}
+                />
+              )}
+              <Marker
+                coordinate={{
+                  latitude: region.latitude,
+                  longitude: region.longitude,
+                }}
+                title="Your location"
+              />
+            </MapView>
+          )}
+
+        </View>
       </SafeAreaView>
     </Modal>
   );
