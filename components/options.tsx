@@ -20,7 +20,7 @@ export const Options: React.FC<OptionsProps> = ({ isOpen, onClose }) => {
         <TouchableOpacity style={styles.option} onPress={() => { router.push('/(tabs)/home') }}>
           <Text style={styles.optionText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/profilePage') }}>
+        <TouchableOpacity style={styles.option} onPress={() => { }}>
           <Text style={styles.optionText}>Profile</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.option} onPress={() => { router.push('/(pages)/ridesPage') }}>
