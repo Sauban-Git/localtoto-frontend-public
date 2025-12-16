@@ -15,6 +15,7 @@ import * as SecureStore from "expo-secure-store";
 import api from "@/services/api";
 import useOtpVerification from "@/hooks/useOtpVerification";
 import PhoneVerificationCard from "@/components/phoneVerification";
+import { router } from "expo-router";
 
 const ProfilePage = () => {
 
@@ -143,6 +144,7 @@ const ProfilePage = () => {
                   onPress={async () => {
                     await SecureStore.deleteItemAsync("token")
                     await SecureStore.deleteItemAsync("refreshToken");
+                    router.replace('/(tabs)/home')
                     // router.replace("/signin");
                   }}
                 >
