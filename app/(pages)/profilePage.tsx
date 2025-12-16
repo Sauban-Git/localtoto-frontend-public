@@ -88,15 +88,16 @@ const ProfilePage = () => {
 
   // -------------------- Load Ride History --------------------
   useEffect(() => {
-    (async () => {
+    const loadRide = async () => {
       try {
         const res = await api.get("/bookings/history");
         setBookings(res.data?.bookings || []);
+
       } catch { }
-    })();
+    };
+    loadRide();
   }, [otpHook.isAuthenticated]);
 
-  const noop = () => { };
   // -------------------- Render --------------------
   return (
     <ScrollView style={styles.container}>
