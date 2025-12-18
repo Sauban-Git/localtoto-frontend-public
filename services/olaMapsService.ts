@@ -1,4 +1,5 @@
 import Toast from "react-native-toast-message";
+import Constants from 'expo-constants'
 
 // Ola Maps Service for frontend
 export interface MapCoordinates {
@@ -51,7 +52,7 @@ export interface ReverseGeocodingResponse {
 }
 
 class OlaMapsService {
-  private baseUrl = __DEV__ ? `${process.env?.EXPO_PUBLIC_API_BASE_URL}/api/bookings` : `${process.env?.EXPO_PUBLIC_API_BASE_URL}/bookings`;
+  private baseUrl = __DEV__ ? `${Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL}/api/bookings` : `${Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL}/bookings`;
 
   async getRoute(
     pickup: MapCoordinates | null,
@@ -60,6 +61,7 @@ class OlaMapsService {
   ): Promise<RouteResponse | null> {
 
     try {
+      console.log(this.baseUrl)
       const response = await fetch(`${this.baseUrl}/route`, {
         method: 'POST',
         headers: {
@@ -82,7 +84,8 @@ class OlaMapsService {
       Toast.show({
         type: "error",
         text1: "Network Error!",
-        text2: "Network error while connecting server!"
+        text2: "Network error while connecting server!",
+        position: "bottom"
       })
       return null;
     }
@@ -90,6 +93,8 @@ class OlaMapsService {
 
   async geocode(query: string): Promise<GeocodingResponse | null> {
     try {
+
+      console.log(this.baseUrl)
 
       const response = await fetch(`${this.baseUrl}/geocode?q=${encodeURIComponent(query)}`);
 

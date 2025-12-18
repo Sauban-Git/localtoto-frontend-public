@@ -11,8 +11,10 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native"
 import Toast from "react-native-toast-message"
+import MapOverlay from "@/components/mapOverlay";
 
 type LocationState = Location.LocationObject | null;
+type ActiveField = "pickup" | "drop" | null;
 
 const Home = () => {
   const [pickupCoords, setPickup] = useState<MapCoordinates | null>(null);
@@ -20,8 +22,12 @@ const Home = () => {
   const [dropCoords, setDrop] = useState<MapCoordinates | null>(null);
   const [dropAddress, setDropAddress] = useState<string>("")
   const [processing, setProcessing] = useState(false)
+  const [pickupLoading, setPickupLoading] = useState(false)
+  const [dropLoading, setDropLoading] = useState(false)
   const router = useRouter()
 
+  const [activeField, setActiveField] = useState<ActiveField>(null);
+  const [mapOpen, setMapOpen] = useState(false);
   const [location, setLocation] = useState<LocationState>(null)
   const [currPickUp, setCurrPickUp] = useState<{ lat: number, lng: number, address: string } | null>(null)
   const [currDropoff, setCurrDropOff] = useState<{ lat: number, lng: number, address: string } | null>(null)
@@ -78,25 +84,88 @@ const Home = () => {
     getLocation()
   }, [])
 
-  const useCurrentLocationForPickUp = async () => {
-    if (!location) return
+  useEffect(() => {
+    currentLocationForPickUp()
+  }, [location])
 
-    const data = await olaMapsService.reverseGeocode(location.coords.latitude, location.coords.longitude)
-    if (data?.success) {
+  const currentLocationForPickUp = async () => {
+    if (!location) return;
 
-      const currentLocation = { lat: location?.coords.latitude, lng: location?.coords.longitude, address: data.address }
-      setCurrPickUp(currentLocation)
+    setPickupLoading(true);
+
+    try {
+      const data = await olaMapsService.reverseGeocode(
+        location.coords.latitude,
+        location.coords.longitude
+      );
+
+      if (data?.success && data.address) {
+        const currentLocation = {
+          lat: location.coords.latitude,
+          lng: location.coords.longitude,
+          address: data.address
+        };
+        setCurrPickUp(currentLocation);
+      } else {
+      }
+    } catch {
+    } finally {
+      setPickupLoading(false);
     }
-  }
-  const useCurrentLocationForDropOff = async () => {
-    if (!location) return
-    const data = await olaMapsService.reverseGeocode(location.coords.latitude, location.coords.longitude)
-    if (data?.success) {
-      const currentLocation = { lat: location?.coords.latitude, lng: location?.coords.longitude, address: data.address }
-      setCurrDropOff(currentLocation)
-    }
-  }
+  };
 
+  const currentLocationForDropOff = async () => {
+    if (!location) return;
+
+    setDropLoading(true);
+
+    try {
+      const data = await olaMapsService.reverseGeocode(
+        location.coords.latitude,
+        location.coords.longitude
+      );
+
+      if (data?.success && data.address) {
+        const currentLocation = {
+          lat: location.coords.latitude,
+          lng: location.coords.longitude,
+          address: data.address
+        };
+        setCurrDropOff(currentLocation);
+      } else {
+      }
+    } catch (error) {
+    } finally {
+      setDropLoading(false);
+    }
+  };
+
+  const handleMapPick = async (coords: MapCoordinates) => {
+    try {
+      const data = await olaMapsService.reverseGeocode(
+        coords.lat,
+        coords.lng
+      );
+
+      if (data?.success && data.address) {
+        const currentLocation = {
+          lat: coords.lat,
+          lng: coords.lng,
+          address: data.address
+        };
+        if (activeField === "drop") {
+          setCurrDropOff(currentLocation);
+        }
+        else {
+          setCurrPickUp(currentLocation)
+        }
+      } else {
+      }
+    } catch {
+    } finally {
+      setPickupLoading(false);
+    }
+  };
 
 
   return (
@@ -108,7 +177,7 @@ const Home = () => {
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: "green" }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 120}   // ← move UP more
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 120}
       >
         <ScrollView
           contentContainerStyle={{ paddingBottom: 40 }}
@@ -122,6 +191,10 @@ const Home = () => {
           </View>
 
           <LocationSelector
+            setOpenMap={() => {
+              setActiveField("pickup");
+              setMapOpen(true);
+            }}
             label="Pickup"
             iconColor="#16a34a"
             value={pickupAddress}
@@ -130,10 +203,14 @@ const Home = () => {
               setPickupAddress(address);
             }}
             externalLocation={currPickUp}
-            onCurrentLocation={useCurrentLocationForPickUp}
+            onCurrentLocation={currentLocationForPickUp}
           />
 
           <LocationSelector
+            setOpenMap={() => {
+              setActiveField("drop");
+              setMapOpen(true);
+            }}
             label="Drop"
             value={dropAddress}
             iconColor="#2563eb"
@@ -142,7 +219,13 @@ const Home = () => {
               setDropAddress(address);
             }}
             externalLocation={currDropoff}
-            onCurrentLocation={useCurrentLocationForDropOff}
+            onCurrentLocation={currentLocationForDropOff}
+          />
+
+          <MapOverlay
+            onPickLocation={handleMapPick}
+            visible={mapOpen}
+            onClose={() => setMapOpen(false)}
           />
 
           <MyButton title="Book" disabled={processing} backgroundColor="white" onPress={handleBooking} />

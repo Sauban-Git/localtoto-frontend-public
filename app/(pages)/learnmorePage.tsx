@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ScrollView, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Image } from 'react-native';
 import { MaterialIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 
 const LearnMorePage: React.FC = () => {
@@ -66,7 +66,7 @@ const LearnMorePage: React.FC = () => {
       <View style={styles.heroSection}>
         <View style={styles.heroContent}>
           <View style={styles.heroText}>
-            <Image source={require('./assets/full_logo.png')} style={styles.heroLogo} />
+            <Image source={require('@/assets/images/full_logo.png')} style={styles.heroLogo} />
             <Text style={styles.heroTitle}>About Us</Text>
             <Text style={styles.heroSubtitle}>
               Revolutionizing urban transportation with eco-friendly e-rickshaws
@@ -90,34 +90,6 @@ const LearnMorePage: React.FC = () => {
           </View>
         ))}
       </View>
-
-      {/* How It Works Section */}
-      <View style={styles.howItWorksSection}>
-        <Text style={styles.sectionTitle}>How It Works</Text>
-        {howItWorks.map((step, index) => (
-          <View key={index} style={styles.stepContainer}>
-            <View style={styles.stepCircle}>
-              <Text style={styles.stepNumber}>{step.step}</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>{step.title}</Text>
-              <Text style={styles.stepDescription}>{step.description}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      {/* CTA Section */}
-      <View style={styles.ctaSection}>
-        <Image source={require('./assets/full_logo.png')} style={styles.ctaLogo} />
-        <Text style={styles.ctaTitle}>Ready to Experience?</Text>
-        <Text style={styles.ctaSubtitle}>
-          Join thousands of satisfied customers who have made the switch to eco-friendly transportation.
-        </Text>
-        <TouchableOpacity style={styles.ctaButton}>
-          <Text style={styles.ctaButtonText}>Download App Now</Text>
-        </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 };
@@ -130,7 +102,7 @@ const styles = StyleSheet.create({
   heroLogo: { width: 120, height: 120, resizeMode: 'contain', marginBottom: 8 },
   heroTitle: { fontSize: 36, fontWeight: 'bold', color: 'white', textAlign: 'center' },
   heroSubtitle: { fontSize: 18, color: 'rgba(255,255,255,0.9)', textAlign: 'center', marginTop: 8 },
-  hero3D: { width: '100%', height: 300, backgroundColor: '#15803D', borderRadius: 16, overflow: 'hidden', marginTop: 16 },
+  hero3D: { width: '100%', height: 300, backgroundColor: '#15803D', borderRadius: 16, overflow: 'hidden', marginTop: 16, alignItems: "center", },
 
   featuresSection: { paddingVertical: 20, paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   featureCard: { width: '48%', backgroundColor: 'white', borderRadius: 16, padding: 16, marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, elevation: 3 },

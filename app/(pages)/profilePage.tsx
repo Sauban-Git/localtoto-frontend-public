@@ -11,23 +11,24 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import api from "@/services/api";
+import useOtpVerification from "@/hooks/useOtpVerification";
+import PhoneVerificationCard from "@/components/phoneVerification";
+import { router } from "expo-router";
 
 const ProfilePage = () => {
-  const router = useRouter();
 
   const [user, setUser] = useState<any>(null);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [bookings, setBookings] = useState<any[]>([]);
+  const otpHook = useOtpVerification();
 
   // -------------------- Load Profile --------------------
   useEffect(() => {
     (async () => {
-      const token = await AsyncStorage.getItem("token");
+      const token = await SecureStore.getItemAsync("token");
       if (!token) {
-        router.replace("/signin");
         return;
       }
 
@@ -37,13 +38,12 @@ const ProfilePage = () => {
         setAvatarUrl(res.data?.user?.profilePhoto?.url || "");
       } catch (e: any) {
         if (e?.response?.status === 401) {
-          router.replace("/signin");
           return;
         }
         Alert.alert("Error", e?.response?.data?.message || "Failed to load profile");
       }
     })();
-  }, []);
+  }, [otpHook.isAuthenticated]);
 
   // -------------------- Pick Image --------------------
   const handleOpenFilePicker = async () => {
@@ -89,153 +89,158 @@ const ProfilePage = () => {
 
   // -------------------- Load Ride History --------------------
   useEffect(() => {
-    (async () => {
+    const loadRide = async () => {
       try {
         const res = await api.get("/bookings/history");
         setBookings(res.data?.bookings || []);
+
       } catch { }
-    })();
-  }, []);
+    };
+    loadRide();
+  }, [otpHook.isAuthenticated]);
 
   // -------------------- Render --------------------
   return (
     <ScrollView style={styles.container}>
       {/* Profile Card */}
-      <View style={styles.card}>
-        <View style={styles.center}>
-          <Image
-            source={{ uri: avatarUrl || "https://via.placeholder.com/200" }}
-            style={styles.avatar}
-          />
+      {!otpHook.isAuthenticated ? <PhoneVerificationCard otpHook={otpHook} /> :
+        <View>
+          <View style={styles.card}>
+            <View style={styles.center}>
+              <Image
+                source={{ uri: avatarUrl || "https://via.placeholder.com/200" }}
+                style={styles.avatar}
+              />
 
-          <TouchableOpacity onPress={handleOpenFilePicker} style={styles.changePhotoBtn}>
-            <Text style={styles.changePhotoText}>Change Photo</Text>
-          </TouchableOpacity>
+              <TouchableOpacity onPress={handleOpenFilePicker} style={styles.changePhotoBtn}>
+                <Text style={styles.changePhotoText}>Change Photo</Text>
+              </TouchableOpacity>
 
-          <Text style={styles.nameText}>
-            {user ? `${user.firstName} ${user.lastName}` : ""}
-          </Text>
+              <Text style={styles.nameText}>
+                {user ? `${user.firstName} ${user.lastName}` : ""}
+              </Text>
 
-          {/* Info boxes */}
-          <View style={{ width: "100%", marginTop: 16 }}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Email</Text>
-              <Text style={styles.infoValue}>{user?.email || "-"}</Text>
-            </View>
+              {/* Info boxes */}
+              <View style={{ width: "100%", marginTop: 16 }}>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Email</Text>
+                  <Text style={styles.infoValue}>{user?.email || "-"}</Text>
+                </View>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Phone</Text>
-              <Text style={styles.infoValue}>{user?.phoneNumber || "-"}</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Phone</Text>
+                  <Text style={styles.infoValue}>{user?.phoneNumber || "-"}</Text>
+                </View>
+              </View>
+
+              {/* Buttons */}
+              <View style={styles.btnRow}>
+                <TouchableOpacity style={styles.editBtn}>
+                  <Text style={styles.editBtnText}>Edit Profile</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.logoutBtn}
+                  onPress={async () => {
+                    await SecureStore.deleteItemAsync("token")
+                    await SecureStore.deleteItemAsync("refreshToken");
+                    router.replace('/(tabs)/home')
+                    // router.replace("/signin");
+                  }}
+                >
+                  <Text style={styles.logoutBtnText}>Log out</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
-          {/* Buttons */}
-          <View style={styles.btnRow}>
-            <TouchableOpacity style={styles.editBtn}>
-              <Text style={styles.editBtnText}>Edit Profile</Text>
-            </TouchableOpacity>
+          {/* Recent Rides */}
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Recent Rides</Text>
 
-            <TouchableOpacity
-              style={styles.logoutBtn}
-              onPress={async () => {
-                await AsyncStorage.removeItem("token");
-                await AsyncStorage.removeItem("refreshToken");
-                router.replace("/signin");
-              }}
-            >
-              <Text style={styles.logoutBtnText}>Log out</Text>
-            </TouchableOpacity>
+            {bookings.slice(0, 3).map((b) => (
+              <View key={b.id} style={styles.rideRow}>
+                <TouchableOpacity
+                  onPress={() => { }}
+                // router.push({
+                //   pathname: "/booking-confirmation",
+                //   params: {
+                //     rideId: b.id,
+                //     pickupAddress: b.pickup_description,
+                //     dropAddress: b.dropoff_description,
+                //     pickupCoords: JSON.stringify({
+                //       lat: b.pickup_lat,
+                //       lng: b.pickup_lng,
+                //     }),
+                //     dropCoords: JSON.stringify({
+                //       lat: b.dropoff_lat,
+                //       lng: b.dropoff_lng,
+                //     }),
+                //     fare: b.fare,
+                //     distance: b.distance_km,
+                //     duration: b.duration_text,
+                //   },
+                // })
+                >
+                  <View>
+                    <Text style={styles.rideTitle}>
+                      {`${b.pickup_description} → ${b.dropoff_description}`}
+                    </Text>
+                    <Text style={styles.rideSub}>
+                      {`${b.status} • ₹${b.fare}`}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+              </View>
+            ))}
+
           </View>
-        </View>
-      </View>
 
-      {/* Recent Rides */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Recent Rides</Text>
+          {/* Full Ride History */}
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Ride History</Text>
 
-        {bookings.slice(0, 3).map((b) => (
-          <View key={b.id} style={styles.rideRow}>
-            <View>
-              <Text style={styles.rideTitle}>
-                {b.pickup_description} → {b.dropoff_description}
-              </Text>
-              <Text style={styles.rideSub}>
-                {b.status} • ₹{b.fare}
-              </Text>
-            </View>
+            <FlatList
+              data={bookings}
+              keyExtractor={(item) => item.id.toString()}
+              scrollEnabled={false}
+              renderItem={({ item: b }) => (
+                <TouchableOpacity
+                  style={styles.historyRow}
+                  onPress={() => { }
+                    // router.push({
+                    //   pathname: "/booking-confirmation",
+                    //   params: {
+                    //     rideId: b.id,
+                    //     pickupAddress: b.pickup_description,
+                    //     dropAddress: b.dropoff_description,
+                    //     pickupCoords: JSON.stringify({
+                    //       lat: b.pickup_lat,
+                    //       lng: b.pickup_lng,
+                    //     }),
+                    //     dropCoords: JSON.stringify({
+                    //       lat: b.dropoff_lat,
+                    //       lng: b.dropoff_lng,
+                    //     }),
+                    //     fare: b.fare,
+                    //     distance: b.distance_km,
+                    //     duration: b.duration_text,
+                    //   },
+                    // })
+                  }
+                >
+                  <Text style={styles.rideTitle}>
+                    {`${b.pickup_description} → ${b.dropoff_description}`}
+                  </Text>
+                  <Text style={styles.rideSub}>
+                    {`${new Date(b.created_at).toLocaleDateString()} • ₹${b.fare}`}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View> </View>}
 
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: "/booking-confirmation",
-                  params: {
-                    rideId: b.id,
-                    pickupAddress: b.pickup_description,
-                    dropAddress: b.dropoff_description,
-                    pickupCoords: JSON.stringify({
-                      lat: b.pickup_lat,
-                      lng: b.pickup_lng,
-                    }),
-                    dropCoords: JSON.stringify({
-                      lat: b.dropoff_lat,
-                      lng: b.dropoff_lng,
-                    }),
-                    fare: b.fare,
-                    distance: b.distance_km,
-                    duration: b.duration_text,
-                  },
-                })
-              }
-            >
-              <Text style={styles.viewText}>View</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-
-      {/* Full Ride History */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Ride History</Text>
-
-        <FlatList
-          data={bookings}
-          keyExtractor={(item) => item.id.toString()}
-          scrollEnabled={false}
-          renderItem={({ item: b }) => (
-            <TouchableOpacity
-              style={styles.historyRow}
-              onPress={() =>
-                router.push({
-                  pathname: "/booking-confirmation",
-                  params: {
-                    rideId: b.id,
-                    pickupAddress: b.pickup_description,
-                    dropAddress: b.dropoff_description,
-                    pickupCoords: JSON.stringify({
-                      lat: b.pickup_lat,
-                      lng: b.pickup_lng,
-                    }),
-                    dropCoords: JSON.stringify({
-                      lat: b.dropoff_lat,
-                      lng: b.dropoff_lng,
-                    }),
-                    fare: b.fare,
-                    distance: b.distance_km,
-                    duration: b.duration_text,
-                  },
-                })
-              }
-            >
-              <Text style={styles.rideTitle}>
-                {b.pickup_description} → {b.dropoff_description}
-              </Text>
-              <Text style={styles.rideSub}>
-                {new Date(b.created_at).toLocaleDateString()} • ₹{b.fare}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
     </ScrollView>
   );
 };
@@ -263,6 +268,7 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 999,
+    borderWidth: 1,
   },
   changePhotoBtn: {
     paddingHorizontal: 12,

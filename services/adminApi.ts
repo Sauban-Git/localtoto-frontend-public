@@ -1,4 +1,5 @@
 
+import Constants from "expo-constants";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
@@ -12,8 +13,8 @@ const storage = {
 
 /* ---------- Base URL ---------- */
 const baseURL = __DEV__
-  ? `${process.env?.EXPO_PUBLIC_API_BASE_URL}/api`
-  : process.env?.EXPO_PUBLIC_API_BASE_URL;
+  ? `${Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL}/api`
+  : Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL;
 
 if (!baseURL) {
   console.warn("[AdminAPI] EXPO_PUBLIC_API_BASE_URL is not defined!");

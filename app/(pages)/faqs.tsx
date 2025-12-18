@@ -2,7 +2,7 @@
 import Animated, { Layout, FadeIn, FadeOut } from 'react-native-reanimated';
 import AnimatedBackground from '@/components/animatedBackground';
 import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, LayoutAnimation, Platform, UIManager, ScrollView } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 

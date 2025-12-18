@@ -1,8 +1,7 @@
-import MyButton from "@/components/button"
 import { useColors } from "@/hooks/useColors"
 import { useRouter } from "expo-router"
 import React, { useEffect } from "react"
-import { StyleSheet, View, Platform } from "react-native"
+import { StyleSheet, Platform } from "react-native"
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated'
 import * as Notifications from 'expo-notifications';
 

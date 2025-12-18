@@ -10,6 +10,7 @@ export default function LocationSelector({
   onSelectLocation,
   onCurrentLocation,
   externalLocation,
+  setOpenMap,
 }: {
   label: string;
   onSelectLocation: (coords: MapCoordinates, address: string) => void;
@@ -21,6 +22,7 @@ export default function LocationSelector({
     lng: number;
     address: string;
   } | null;
+  setOpenMap: () => void;
 }) {
   return (
     <View style={{ paddingHorizontal: 10, paddingTop: 20 }}>
@@ -30,6 +32,7 @@ export default function LocationSelector({
       <View style={{ position: "relative", width: "100%" }}>
         {/* Search Input */}
         <OlaSearchInput
+          setOpenMap={setOpenMap}
           onCurrentLocation={onCurrentLocation}
           placeholder={`Search ${label.toLowerCase()} or press location button`}
           onSelect={(data: any) => {
