@@ -8,7 +8,7 @@ import StepIndicator from '@/components/stepIndicator';
 import useRiderOtpVerification from '@/hooks/useRiderOtpVerification';
 import api from '@/services/api';
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, ToastAndroid } from 'react-native';
 
 const BecomeRider = () => {
   const [step, setStep] = useState(1);
@@ -37,21 +37,37 @@ const BecomeRider = () => {
   const submit = async () => {
     const data = new FormData();
 
+    const isMissingData = Object.keys(form).some((key) => {
+      const val = form[key];
+
+      if (val && typeof val === "object" && "uri" in val) {
+        return !val.uri;
+      }
+
+      return val === null || val === undefined || val === "";
+    });
+
+    if (isMissingData) {
+      ToastAndroid.show("All fields are required!", ToastAndroid.SHORT)
+      return;
+    }
+
     Object.keys(form).forEach((key) => {
       const val = form[key];
+
       if (val && val.uri) {
         data.append(key, {
           uri: val.uri,
           name: `${key}.jpg`,
-          type: "image/jpeg"
+          type: "image/jpeg",
         } as any);
       } else {
         data.append(key, val);
       }
     });
 
-    await api.post('/riders/applications', data, {
-      headers: { "Content-Type": "multipart/form-data" }
+    await api.post("/riders/applications", data, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
     setStep(4);

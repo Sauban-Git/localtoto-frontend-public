@@ -7,9 +7,10 @@ type MyButtonProps = {
   onPress: () => void;
   backgroundColor?: string; // optional background color prop
   disabled?: boolean;
+  loading?: boolean;
 };
 
-export default function MyButton({ title, onPress, backgroundColor, disabled }: MyButtonProps) {
+export default function MyButton({ title, onPress, backgroundColor, disabled, loading }: MyButtonProps) {
   const c = useColors();
 
   return (
@@ -21,11 +22,13 @@ export default function MyButton({ title, onPress, backgroundColor, disabled }: 
       disabled={disabled}
       onPress={onPress}
     >
-      {disabled ? (
+      {disabled && loading ? (
         <ActivityIndicator size="small" color={c.text} />
-      ) : (
+      ) : disabled ? (
+        <Text style={[styles.buttonText, { color: c.text, opacity: 0.5 }]}>{title}</Text>
+      ) :
         <Text style={[styles.buttonText, { color: c.text }]}>{title}</Text>
-      )}
+      }
     </Pressable>
   );
 }

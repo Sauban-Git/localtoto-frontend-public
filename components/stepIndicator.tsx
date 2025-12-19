@@ -30,7 +30,7 @@ export default function StepIndicator({ step }: { step: number }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", justifyContent: "center", marginVertical: 20 },
+  row: { flexDirection: "row", justifyContent: "center", marginVertical: 20, alignItems: "center" },
   circle: {
     width: 32,
     height: 32,
