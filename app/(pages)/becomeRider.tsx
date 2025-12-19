@@ -8,7 +8,7 @@ import StepIndicator from '@/components/stepIndicator';
 import useRiderOtpVerification from '@/hooks/useRiderOtpVerification';
 import api from '@/services/api';
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, ToastAndroid } from 'react-native';
+import { View, Text, ScrollView, ToastAndroid, KeyboardAvoidingView } from 'react-native';
 
 const BecomeRider = () => {
   const [step, setStep] = useState(1);
@@ -74,46 +74,48 @@ const BecomeRider = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20 }}>
-      <StepIndicator step={step} />
+    <KeyboardAvoidingView style={{ justifyContent: "center" }} >
+      <ScrollView contentContainerStyle={{ padding: 20 }}>
+        <StepIndicator step={step} />
 
-      {step === 1 && (
-        <>
-          <Step1Personal
-            form={form}
-            setForm={setForm}
-          />
-          <OtpBox otpHook={riderOtpHook} />
-        </>
-      )}
-
-      {step === 2 && <Step2Vehicle form={form} setForm={setForm} />}
-
-      {step === 3 && <Step3Documents form={form} setForm={setForm} />}
-
-      {step === 4 && (
-        <Text style={{ fontSize: 22, textAlign: "center", marginTop: 40 }}>
-          Application Submitted Successfully!
-        </Text>
-      )}
-
-      {step < 4 && (
-        <View style={{ marginTop: 20 }}>
-          {step > 1 && <MyButton title="Previous" onPress={() => setStep(step - 1)} backgroundColor='#7DA7D9' />}
-
-          {step < 3 && (
-            <MyButton
-              title="Next"
-              onPress={() => setStep(step + 1)}
-              disabled={step === 1 && !phoneVerified}
-              backgroundColor='#8EC6A3'
+        {step === 1 && (
+          <>
+            <Step1Personal
+              form={form}
+              setForm={setForm}
             />
-          )}
+            <OtpBox otpHook={riderOtpHook} />
+          </>
+        )}
 
-          {step === 3 && <MyButton title="Submit Application" onPress={submit} backgroundColor='#63B28D' />}
-        </View>
-      )}
-    </ScrollView>
+        {step === 2 && <Step2Vehicle form={form} setForm={setForm} />}
+
+        {step === 3 && <Step3Documents form={form} setForm={setForm} />}
+
+        {step === 4 && (
+          <Text style={{ fontSize: 22, textAlign: "center", marginTop: 40 }}>
+            Application Submitted Successfully!
+          </Text>
+        )}
+
+        {step < 4 && (
+          <View style={{ marginTop: 20 }}>
+            {step > 1 && <MyButton title="Previous" onPress={() => setStep(step - 1)} backgroundColor='#7DA7D9' />}
+
+            {step < 3 && (
+              <MyButton
+                title="Next"
+                onPress={() => setStep(step + 1)}
+                disabled={step === 1 && !phoneVerified}
+                backgroundColor='#8EC6A3'
+              />
+            )}
+
+            {step === 3 && <MyButton title="Submit Application" onPress={submit} backgroundColor='#63B28D' />}
+          </View>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
