@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { View, Text } from 'react-native';
-import { Picker } from '@react-native-picker/picker';   // <-- FIXED
-import TextInputField from '../input/textInputField';
+import { View, Text, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import TextInputField from '@/components/input/textInputField';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Step2Vehicle({ form, setForm }: any) {
   return (
@@ -13,16 +14,26 @@ export default function Step2Vehicle({ form, setForm }: any) {
       </Text>
 
       {/* Vehicle Type */}
-      <Picker
-        selectedValue={form.vehicleType}
-        onValueChange={(v: any) => setForm({ ...form, vehicleType: v })}
-        style={{ backgroundColor: '#f2f2f2', marginVertical: 8 }}
-      >
-        <Picker.Item label="Select Vehicle Type" value="" />
-        <Picker.Item label="E-Rickshaw" value="e-rickshaw" />
-        <Picker.Item label="E-Auto" value="e-auto" />
-        <Picker.Item label="Other" value="other" />
-      </Picker>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.vehicleType}
+          onValueChange={(v) => setForm({ ...form, vehicleType: v })}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select Vehicle Type" value="" />
+          <Picker.Item label="E-Rickshaw" value="e-rickshaw" />
+          <Picker.Item label="E-Auto" value="e-auto" />
+          <Picker.Item label="Other" value="other" />
+        </Picker>
+
+        {/* Right arrow */}
+        <Ionicons
+          name="chevron-down"
+          size={20}
+          color="#666"
+          style={styles.arrow}
+        />
+      </View>
 
       {/* Vehicle Number */}
       <TextInputField
@@ -33,19 +44,50 @@ export default function Step2Vehicle({ form, setForm }: any) {
       />
 
       {/* Experience */}
-      <Picker
-        selectedValue={form.experience}
-        onValueChange={(v: any) => setForm({ ...form, experience: v })}
-        style={{ backgroundColor: '#f2f2f2', marginVertical: 8 }}
-      >
-        <Picker.Item label="Select Experience" value="" />
-        <Picker.Item label="0-1 years" value="0-1" />
-        <Picker.Item label="1-3 years" value="1-3" />
-        <Picker.Item label="3-5 years" value="3-5" />
-        <Picker.Item label="5+ years" value="5+" />
-      </Picker>
 
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.experience}
+          onValueChange={(v) => setForm({ ...form, experience: v })}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select experience" value="" />
+          <Picker.Item label="0-1 year" value="0-1 year" />
+          <Picker.Item label="1-3 years" value="1-2 years" />
+          <Picker.Item label="3-5 years" value="3-5 years" />
+          <Picker.Item label="5+ years" value="5+ years" />
+        </Picker>
+
+        {/* Right arrow */}
+        <Ionicons
+          name="chevron-down"
+          size={20}
+          color="#666"
+          style={styles.arrow}
+        />
+      </View>
     </View>
   );
 }
 
+
+const styles = StyleSheet.create({
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  picker: {
+    height: 50,
+    paddingRight: 40, // space for arrow
+    color: '#000',
+  },
+  arrow: {
+    position: 'absolute',
+    right: 12,
+    pointerEvents: 'none', // so picker still opens
+  },
+});

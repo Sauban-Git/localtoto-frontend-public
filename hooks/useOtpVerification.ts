@@ -142,10 +142,21 @@ export default function useOtpVerification() {
 
 
         // Persist token, refresh token, and maybe user info
-        await SecureStore.setItemAsync("token", res.data.token);
-        await SecureStore.setItemAsync("refreshToken", res.data.refreshToken);
-        await SecureStore.setItemAsync("user", JSON.stringify(res.data.user));
-        await SecureStore.setItemAsync("phoneVerified", "true"); // optional flag
+        if (res.data.token) {
+
+          await SecureStore.setItemAsync("token", res.data.token);
+        } else if (res.data.refresh) {
+          await SecureStore.setItemAsync("refreshToken", res.data.refreshToken);
+
+        } else if (res.data.token && res.data.refresh) {
+          await SecureStore.setItemAsync("refreshToken", res.data.refreshToken);
+          await SecureStore.setItemAsync("token", res.data.token);
+        }
+        if (res.data.user) {
+
+          await SecureStore.setItemAsync("user", JSON.stringify(res.data.user));
+        }
+        await SecureStore.setItemAsync("phoneVerified", "true");
       } else {
         setOtpFeedback({
           type: "error",

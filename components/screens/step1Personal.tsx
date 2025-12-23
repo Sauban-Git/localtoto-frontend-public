@@ -1,9 +1,9 @@
 
-import React from 'react';
-import { View, Text, Button } from 'react-native';
-import TextInputField from '../input/textInputField';
-import OtpBox from '../otpBox';
-import useRiderOtpVerification from '@/hooks/useRiderOtpVerification';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import TextInputField from '@/components/input/textInputField';
+import { Ionicons } from '@expo/vector-icons';
 
 interface Props {
   form: any;
@@ -14,7 +14,7 @@ export default function Step1Personal({
   form,
   setForm,
 }: Props) {
-
+  const [showDobPicker, setShowDobPicker] = useState(false);
   return (
     <View>
       <TextInputField
@@ -38,6 +38,50 @@ export default function Step1Personal({
         onChange={(t) => setForm({ ...form, address: t })}
       />
 
+      {/* DOB FIELD */}
+      <Pressable
+        style={styles.dobField}
+        onPress={() => setShowDobPicker(true)}
+      >
+        <Ionicons name="calendar-outline" size={20} color="#888" />
+        <Text style={styles.dobText}>
+          {form.dob
+            ? new Date(form.dob).toDateString()
+            : "Date of Birth"}
+        </Text>
+      </Pressable>
+
+      {showDobPicker && (
+        <DateTimePicker
+          value={form.dob ? new Date(form.dob) : new Date(2000, 0, 1)}
+          mode="date"
+          maximumDate={new Date()}
+          onChange={(_, selectedDate) => {
+            setShowDobPicker(false);
+            if (selectedDate) {
+              setForm({ ...form, dob: selectedDate.toISOString() });
+            }
+          }}
+        />
+      )}
+
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  dobField: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 14,
+    marginTop: 12,
+  },
+  dobText: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: "#555",
+  },
+});
